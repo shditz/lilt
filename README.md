@@ -33,7 +33,7 @@ Built for Fabric, targeting Minecraft 26.3.
 
 ## Configuration
 
-Config is stored at `.minecraft/config/lilt.json`. Edit it directly to adjust settings or switch active profiles.
+Configure in-game directly via **Options → Video Settings → Lilt Options...**, or edit `.minecraft/config/lilt.json`.
 
 ### Profiles
 
