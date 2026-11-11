@@ -30,11 +30,12 @@ class LiltConfigTest {
 
         config.setActiveProfile("performance");
         assertEquals("performance", config.getActiveProfile());
-        assertEquals(500, config.getParticleBudget());
+        assertEquals(2500, config.getParticleBudget());
+        assertEquals(120, config.getTargetFps());
 
         config.setActiveProfile("low");
         assertEquals("low", config.getActiveProfile());
-        assertEquals(2000, config.getParticleBudget());
+        assertEquals(300, config.getParticleBudget());
         assertEquals(30, config.getTargetFps());
     }
 
@@ -45,7 +46,6 @@ class LiltConfigTest {
         config.setOverlayEnabled(true);
         config.setParticleBudget(750);
 
-        // Reload
         LiltConfig reloaded = LiltConfig.load(configFile);
         assertTrue(reloaded.isOverlayEnabled());
         assertEquals(750, reloaded.getParticleBudget());
@@ -60,9 +60,7 @@ class LiltConfigTest {
         assertNotNull(config);
         assertEquals("balanced", config.getActiveProfile());
 
-        // Check broken backup file
         Path broken = tempDir.resolve("lilt.json.broken");
         assertTrue(Files.exists(broken));
     }
 }
-

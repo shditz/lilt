@@ -4,10 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Main entry point for Lilt. Handles common initialization.
- * Most actual work happens on the client side via LiltClient.
- */
 public class LiltMod implements ModInitializer {
 
     public static final String MOD_ID = "lilt";
@@ -16,6 +12,6 @@ public class LiltMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        LOGGER.info("Lilt common init");
+        LOGGER.info("Lilt initialized");
     }
 }

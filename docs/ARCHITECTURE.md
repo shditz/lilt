@@ -28,49 +28,50 @@ dev.lilt
 │   ├── OverlayRenderer  — HUD rendering
 │   └── KeyBindings      — Key registration
 └── mixin
-    ├── MinecraftClientMixin — Render hook
-    └── ParticleManagerMixin — Particle budget integration
+    ├── MinecraftMixin   — Render loop frame interval hook
+    └── ParticleEngineMixin — Particle lifecycle & budget integration
 ```
 
 ## Initialization Order
 
-1. `LiltMod.onInitialize()` — common init (logging only)
+1. `LiltMod.onInitialize()` — common init
 2. `LiltClient.onInitializeClient()` — client init:
    - Load config
-   - Detect hardware (CPU/JVM)
+   - Detect hardware baseline
    - Create performance monitor
-   - Create diagnostics
+   - Create diagnostics engine
    - Detect installed mods
    - Create particle optimizer
    - Create adaptive controller
    - Create overlay renderer
+   - Register HUD element
    - Register keybindings
-   - Register tick and HUD callbacks
-3. First in-game tick — query GPU info (requires GL context)
+   - Register tick callbacks
+3. First in-game tick — query GPU device info safely via RenderPearl
 
 ## Data Flow
 
 ```
-PerformanceMonitor (frame times, GC)
+PerformanceMonitor (frame intervals, ticks, GC)
         │
         ▼
-PerformanceDiagnostics (pressure classification)
+PerformanceDiagnostics (evidence-based pressure classification)
         │
         ▼
 AdaptiveController (adjusts particle budget)
         │
         ▼
-ParticleOptimizer (budget/distance decisions)
+ParticleOptimizer (budget & distance decisions)
         │
         ▼
-ParticleManagerMixin (intercepts particle additions)
+ParticleEngineMixin (budget enforcement & lifecycle sync)
 ```
 
 ## Mixin Strategy
 
-- `@Inject` only — no `@Overwrite` or `@Redirect`
-- `MinecraftClientMixin` — hook for render loop (future instrumentation)
-- `ParticleManagerMixin` — intercepts `addParticle` and `tick` for budget management
+- `@Inject` only — zero `@Overwrite` or invasive redirects
+- `MinecraftMixin` — non-invasive hook on `renderFrame` to measure frame presentation intervals
+- `ParticleEngineMixin` — intercepts `createParticle` for budget and distance culling, synchronizes active counts on `tick`, and resets on world unload
 
 ## Configuration
 

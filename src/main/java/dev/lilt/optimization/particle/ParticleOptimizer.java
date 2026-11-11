@@ -1,21 +1,11 @@
 package dev.lilt.optimization.particle;
 
-import dev.lilt.LiltMod;
 import dev.lilt.config.LiltConfig;
 import dev.lilt.compat.ModCompat;
 
-/**
- * Manages particle workload by tracking the active particle count
- * and providing a budget-based culling decision.
- * 
- * This optimizer works by:
- * 1. Maintaining a per-tick count of active particles.
- * 2. Rejecting new particle additions when over budget.
- * 3. Distance-culling particles far from the camera.
- * 
- * Integrated via Mixin into the particle manager.
- */
 public class ParticleOptimizer {
+
+    public static final double NEAR_PROTECT_DISTANCE_SQ = 36.0;
 
     private final LiltConfig config;
     private final ModCompat modCompat;
@@ -31,23 +21,26 @@ public class ParticleOptimizer {
         this.effectiveBudget = config.getParticleBudget();
     }
 
-    /**
-     * Called before adding a new particle.
-     * Returns true if the particle should be allowed.
-     */
     public boolean shouldAllowParticle(double distanceSqToCamera) {
+        return shouldAllowParticle(distanceSqToCamera, false);
+    }
+
+    public boolean shouldAllowParticle(double distanceSqToCamera, boolean isCritical) {
         if (!config.isParticleOptimizationEnabled()) {
             return true;
         }
 
-        // Distance culling
+        if (isCritical || distanceSqToCamera <= NEAR_PROTECT_DISTANCE_SQ) {
+            currentParticleCount++;
+            return true;
+        }
+
         if (distanceSqToCamera > config.getParticleDistanceCullSq()) {
             rejectedThisTick++;
             totalRejected++;
             return false;
         }
 
-        // Budget check
         if (currentParticleCount >= effectiveBudget) {
             rejectedThisTick++;
             totalRejected++;
@@ -58,18 +51,17 @@ public class ParticleOptimizer {
         return true;
     }
 
-    /**
-     * Called at the start of each tick to reset counters.
-     */
     public void resetTickCounters() {
         rejectedThisTick = 0;
     }
 
-    /**
-     * Called to sync the known particle count from the particle manager.
-     */
     public void updateParticleCount(int count) {
-        this.currentParticleCount = count;
+        this.currentParticleCount = Math.max(0, count);
+    }
+
+    public void onWorldUnload() {
+        this.currentParticleCount = 0;
+        this.rejectedThisTick = 0;
     }
 
     public int getEffectiveBudget() { return effectiveBudget; }

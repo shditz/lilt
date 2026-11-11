@@ -10,41 +10,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * Persistent JSON configuration for Lilt.
- * Supports profiles, schema versioning, and safe loading with recovery.
- */
 public class LiltConfig {
 
     private static final int SCHEMA_VERSION = 1;
     private static final String CONFIG_FILE = "lilt.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    // Schema
     private int schemaVersion = SCHEMA_VERSION;
-
-    // Profile
     private String activeProfile = "balanced";
-
-    // Overlay
     private boolean overlayEnabled = false;
-
-    // Adaptive controller
     private boolean adaptiveEnabled = true;
     private int targetFps = 60;
-
-    // Feature toggles
     private boolean particleOptimizationEnabled = true;
     private int particleBudget = 1000;
-    private double particleDistanceCullSq = 1024.0; // 32 blocks squared
-
-    // Monitoring
-    private int monitorWindowSize = 300; // frames
-
-    // Diagnostics
+    private double particleDistanceCullSq = 1024.0;
+    private int monitorWindowSize = 600;
     private boolean diagnosticsEnabled = true;
-
-    // Adaptive tuning
     private double adaptiveHysteresisLow = 0.85;
     private double adaptiveHysteresisHigh = 0.95;
     private int adaptiveCooldownTicks = 100;
@@ -77,7 +58,6 @@ public class LiltConfig {
             } catch (JsonSyntaxException e) {
                 LiltMod.LOGGER.error("Invalid config file, using defaults", e);
                 config = new LiltConfig();
-                // Back up the broken config
                 try {
                     Path backup = configPath.resolveSibling("lilt.json.broken");
                     Files.copy(configPath, backup);
@@ -99,7 +79,6 @@ public class LiltConfig {
     }
 
     private static LiltConfig migrate(LiltConfig old) {
-        // Future migration logic goes here
         LiltConfig migrated = new LiltConfig();
         migrated.activeProfile = old.activeProfile;
         migrated.overlayEnabled = old.overlayEnabled;
@@ -134,8 +113,8 @@ public class LiltConfig {
     private void applyProfile() {
         switch (activeProfile) {
             case "low" -> {
-                particleBudget = 2000;
-                particleDistanceCullSq = 4096.0;
+                particleBudget = 300;
+                particleDistanceCullSq = 400.0;
                 targetFps = 30;
             }
             case "balanced" -> {
@@ -144,11 +123,10 @@ public class LiltConfig {
                 targetFps = 60;
             }
             case "performance" -> {
-                particleBudget = 500;
-                particleDistanceCullSq = 576.0;
-                targetFps = 60;
+                particleBudget = 2500;
+                particleDistanceCullSq = 4096.0;
+                targetFps = 120;
             }
-            // custom: use whatever the user configured
         }
     }
 
@@ -162,7 +140,6 @@ public class LiltConfig {
         }
     }
 
-    // Getters
     public String getActiveProfile() { return activeProfile; }
     public boolean isOverlayEnabled() { return overlayEnabled; }
     public boolean isAdaptiveEnabled() { return adaptiveEnabled; }
@@ -176,7 +153,6 @@ public class LiltConfig {
     public double getAdaptiveHysteresisHigh() { return adaptiveHysteresisHigh; }
     public int getAdaptiveCooldownTicks() { return adaptiveCooldownTicks; }
 
-    // Setters
     public void setActiveProfile(String profile) {
         this.activeProfile = profile;
         applyProfile();

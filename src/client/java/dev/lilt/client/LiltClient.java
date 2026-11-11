@@ -15,10 +15,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.resources.Identifier;
 
-/**
- * Client-side entry point for Lilt.
- * Initializes all subsystems in the correct order.
- */
 public class LiltClient implements ClientModInitializer {
 
     private static LiltConfig config;
@@ -35,49 +31,52 @@ public class LiltClient implements ClientModInitializer {
     public void onInitializeClient() {
         LiltMod.LOGGER.info("Lilt client initialization starting");
 
-        // 1. Load configuration
         config = LiltConfig.load();
         LiltMod.LOGGER.info("Configuration loaded: profile={}", config.getActiveProfile());
 
-        // 2. Detect hardware baseline
         hardwareInfo = new HardwareInfo();
         LiltMod.LOGGER.info("Hardware detected: {} CPU cores, max heap: {} MB",
             hardwareInfo.getLogicalProcessors(), hardwareInfo.getMaxHeapMb());
 
-        // 3. Initialize performance monitor
         monitor = new PerformanceMonitor(config);
-
-        // 4. Initialize diagnostics engine
         diagnostics = new PerformanceDiagnostics(monitor);
 
-        // 5. Detect compatible and installed mods
         modCompat = new ModCompat();
         modCompat.detectInstalledMods();
 
-        // 6. Initialize particle optimizer
         particleOptimizer = new ParticleOptimizer(config, modCompat);
-
-        // 7. Initialize adaptive controller
         adaptiveController = new AdaptiveController(config, monitor, diagnostics, particleOptimizer);
-
-        // 8. Initialize overlay renderer
         overlayRenderer = new OverlayRenderer(config, monitor, diagnostics, hardwareInfo);
 
-        // 9. Register HUD element with Fabric API
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("lilt", "performance_overlay"), overlayRenderer);
-
-        // 10. Register keybindings
         KeyBindings.register();
 
-        // 11. Register client tick event
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null && !inGameInitialized) {
                 inGameInitialized = true;
-                hardwareInfo.queryGpuInfo();
-                LiltMod.LOGGER.info("Lilt fully active in-game. GPU: {}", hardwareInfo.getGpuRenderer());
+                try {
+                    com.mojang.renderpearl.api.device.GpuDevice device = com.mojang.blaze3d.systems.RenderSystem.tryGetDevice();
+                    if (device != null) {
+                        com.mojang.renderpearl.api.device.DeviceInfo info = device.getDeviceInfo();
+                        if (info != null) {
+                            hardwareInfo.setGpuInfo(info.vendorName(), info.name(), info.backendName());
+                        }
+                    }
+                } catch (Throwable t) {
+                    LiltMod.LOGGER.warn("Could not query GPU info via RenderPearl: {}", t.getMessage());
+                }
+                LiltMod.LOGGER.info("Lilt active. GPU: {} (Backend: {})",
+                    hardwareInfo.getGpuRenderer(), hardwareInfo.getGraphicsBackend());
             }
 
             if (inGameInitialized) {
+                if (client.hasSingleplayerServer() && client.getSingleplayerServer() != null) {
+                    long avgNanos = client.getSingleplayerServer().getAverageTickTimeNanos();
+                    monitor.recordIntegratedServerTick(avgNanos);
+                } else {
+                    monitor.setRemoteServer();
+                }
+
                 monitor.tick();
                 diagnostics.update();
 

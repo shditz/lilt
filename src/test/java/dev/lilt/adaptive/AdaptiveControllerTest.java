@@ -35,9 +35,8 @@ class AdaptiveControllerTest {
 
     @Test
     void testDoesNotActWithoutSufficientFrames() {
-        // Only 10 frames recorded (< 60 threshold)
         for (int i = 0; i < 10; i++) {
-            monitor.recordFrame(50_000_000L); // 20 FPS (below target 60)
+            monitor.recordFrame(50_000_000L);
         }
         diagnostics.update();
         controller.tick();
@@ -47,7 +46,6 @@ class AdaptiveControllerTest {
 
     @Test
     void testReducesWorkloadUnderPerformancePressure() {
-        // Record 100 slow frames: 50ms = 20 FPS (< target 60 * 0.85 = 51)
         for (int i = 0; i < 100; i++) {
             monitor.recordFrame(50_000_000L);
         }
@@ -55,14 +53,12 @@ class AdaptiveControllerTest {
         controller.tick();
 
         assertEquals(AdaptiveController.AdaptiveState.REDUCING, controller.getState());
-        // Initial budget was 1000, 20% reduction should make it 800
         assertEquals(800, particleOptimizer.getEffectiveBudget());
         assertTrue(controller.getLastAction().contains("Reduced particle budget"));
     }
 
     @Test
     void testRespectsCooldown() {
-        // Record 100 slow frames
         for (int i = 0; i < 100; i++) {
             monitor.recordFrame(50_000_000L);
         }
@@ -70,9 +66,7 @@ class AdaptiveControllerTest {
         controller.tick();
         assertEquals(800, particleOptimizer.getEffectiveBudget());
 
-        // Second tick immediately afterwards should be in cooldown, not reducing further
         controller.tick();
         assertEquals(800, particleOptimizer.getEffectiveBudget());
     }
 }
-

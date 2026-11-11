@@ -8,10 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Hooks into Minecraft's main client render loop.
- * Uses @Inject with minimal interference to record real frame intervals.
- */
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
 

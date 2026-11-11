@@ -26,12 +26,11 @@ class PerformanceMonitorTest {
 
     @Test
     void testFrameRecordingAndPercentiles() {
-        // Record 100 frames with varying durations: 10ms (most) and a few slow 50ms frames
         for (int i = 0; i < 90; i++) {
-            monitor.recordFrame(10_000_000L); // 10ms
+            monitor.recordFrame(10_000_000L);
         }
         for (int i = 0; i < 10; i++) {
-            monitor.recordFrame(50_000_000L); // 50ms
+            monitor.recordFrame(50_000_000L);
         }
 
         assertTrue(monitor.getAvgFrameTimeMs() >= 10.0 && monitor.getAvgFrameTimeMs() <= 20.0);
@@ -43,8 +42,7 @@ class PerformanceMonitorTest {
 
     @Test
     void testTickTiming() {
-        monitor.recordTick(5_000_000L); // 5ms
+        monitor.recordTick(5_000_000L);
         assertEquals(5.0, monitor.getLastTickTimeMs(), 0.01);
     }
 }
-

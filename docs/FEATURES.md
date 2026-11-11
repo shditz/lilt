@@ -14,22 +14,21 @@ Collects frame-level metrics using a ring buffer:
 - GC collection count and time
 - Client tick duration
 
-Configurable window size (default: 300 frames).
+Configurable window size (default: 600 frames).
 
 ## Performance Overlay
 
 Toggleable HUD (F7) showing:
 
 - FPS with color coding (green/yellow/red)
-- Frame time percentiles
+- Frame presentation interval and percentiles (P50/P99)
 - Heap usage and GC activity
-- Tick timing
-- GPU info
-- Pressure classification
-- Active profile
-- Adaptive controller state
+- Client and integrated server tick timing
+- GPU device and graphics backend
+- Evidence-based pressure classification
+- Active profile and adaptive controller state
 
-Minimal rendering overhead — uses `DrawContext.drawText` directly.
+Clean, minimal rendering via modern Fabric HUD element.
 
 ## Hardware Detection
 
@@ -39,24 +38,24 @@ Detects at startup:
 - JVM version and max heap
 - OS name and architecture
 
-Detects on first render (GL context required):
+Detects safely via Minecraft RenderPearl API:
 
 - GPU vendor and renderer
-- OpenGL version
+- Graphics backend (OpenGL / Vulkan)
 - GPU vendor classification (NVIDIA/AMD/Intel/Apple/Unknown)
 
 ## Performance Diagnostics
 
-Classifies performance pressure after collecting sufficient data (120+ frames):
+Classifies performance pressure based on verifiable telemetry (120+ frames):
 
 | Classification | Condition |
 |---|---|
-| CPU-bound | Tick overrun (>50ms) + high frame times |
-| GPU-bound | High frame times with normal tick rate |
+| CPU-bound | Tick overrun (>50ms client or integrated server) |
+| GPU-bound | Verified asynchronous GPU timer query showing high GPU time |
 | Memory | Heap usage >85% + frequent GC |
 | Mixed | High frame time variance (P99/P50 > 3x) |
 | None | No significant pressure |
-| Unknown | Insufficient data |
+| Unknown | Insufficient data or elevated frame times without direct GPU telemetry |
 
 ## Adaptive Controller
 
@@ -74,9 +73,9 @@ Budget-based particle management via Mixin:
 
 - Configurable particle budget (default: 1000)
 - Distance-based culling (default: 32 blocks)
-- Per-tick counter reset
-- Tracks rejected particle count
-- Cancellable — particles beyond budget or distance are skipped
+- Near-player protection: particles within 6 blocks are never culled
+- Lifecycle synchronization with living ParticleEngine particle counts
+- Clean state reset on world unload and level transitions
 
 ## Configuration
 

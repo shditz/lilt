@@ -15,20 +15,18 @@ class ParticleOptimizerTest {
     @BeforeEach
     void setUp() {
         config = new LiltConfig();
-        // default: budget = 1000, distanceCullSq = 1024.0 (32 blocks)
         optimizer = new ParticleOptimizer(config, new ModCompat());
     }
 
     @Test
     void testAllowsParticleWithinBudgetAndDistance() {
-        assertTrue(optimizer.shouldAllowParticle(100.0)); // 10 blocks away
+        assertTrue(optimizer.shouldAllowParticle(100.0));
         assertEquals(1, optimizer.getCurrentParticleCount());
         assertEquals(0, optimizer.getRejectedThisTick());
     }
 
     @Test
     void testRejectsParticleExceedingDistance() {
-        // Distance squared > 1024.0
         assertFalse(optimizer.shouldAllowParticle(1200.0));
         assertEquals(0, optimizer.getCurrentParticleCount());
         assertEquals(1, optimizer.getRejectedThisTick());
@@ -41,10 +39,31 @@ class ParticleOptimizerTest {
         optimizer.updateParticleCount(50);
         assertEquals(50, optimizer.getCurrentParticleCount());
 
-        // Particle beyond budget should be rejected
         assertFalse(optimizer.shouldAllowParticle(50.0));
         assertEquals(1, optimizer.getRejectedThisTick());
         assertEquals(1, optimizer.getTotalRejected());
+    }
+
+    @Test
+    void testNearPlayerParticlesAlwaysProtected() {
+        optimizer.setEffectiveBudget(50);
+        optimizer.updateParticleCount(50);
+
+        assertTrue(optimizer.shouldAllowParticle(25.0));
+        assertTrue(optimizer.shouldAllowParticle(4.0));
+        assertEquals(0, optimizer.getRejectedThisTick());
+    }
+
+    @Test
+    void testWorldUnloadResetsState() {
+        optimizer.updateParticleCount(500);
+        optimizer.shouldAllowParticle(2000.0);
+        assertTrue(optimizer.getCurrentParticleCount() > 0);
+        assertTrue(optimizer.getRejectedThisTick() > 0);
+
+        optimizer.onWorldUnload();
+        assertEquals(0, optimizer.getCurrentParticleCount());
+        assertEquals(0, optimizer.getRejectedThisTick());
     }
 
     @Test
@@ -52,7 +71,7 @@ class ParticleOptimizerTest {
         config.setParticleOptimizationEnabled(false);
         optimizer.setEffectiveBudget(1);
 
-        assertTrue(optimizer.shouldAllowParticle(99999.0)); // far distance
-        assertTrue(optimizer.shouldAllowParticle(99999.0)); // over budget
+        assertTrue(optimizer.shouldAllowParticle(99999.0));
+        assertTrue(optimizer.shouldAllowParticle(99999.0));
     }
 }

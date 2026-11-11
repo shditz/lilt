@@ -6,13 +6,6 @@ import dev.lilt.diagnostics.PerformanceDiagnostics;
 import dev.lilt.monitor.PerformanceMonitor;
 import dev.lilt.optimization.particle.ParticleOptimizer;
 
-/**
- * Adaptive performance controller.
- * Uses rolling measurements, hysteresis, and cooldowns to adjust
- * Lilt-controlled features based on real performance data.
- * 
- * Never touches Minecraft's own settings (render distance, VSync, etc.).
- */
 public class AdaptiveController {
 
     private final LiltConfig config;
@@ -38,7 +31,6 @@ public class AdaptiveController {
             return;
         }
 
-        // Need enough data before acting
         if (monitor.getFrameCount() < 60) return;
 
         double fpsRatio = monitor.getFpsRatio(config.getTargetFps());
@@ -46,14 +38,12 @@ public class AdaptiveController {
         double hysteresisHigh = config.getAdaptiveHysteresisHigh();
 
         if (fpsRatio < hysteresisLow) {
-            // Performance is below target — increase optimization
             if (state != AdaptiveState.REDUCING) {
                 state = AdaptiveState.REDUCING;
                 applyReduction();
                 cooldownTicks = config.getAdaptiveCooldownTicks();
             }
         } else if (fpsRatio > hysteresisHigh) {
-            // Performance is comfortably above target — relax optimization
             if (state != AdaptiveState.RELAXING) {
                 state = AdaptiveState.RELAXING;
                 applyRelaxation();
@@ -65,7 +55,6 @@ public class AdaptiveController {
     }
 
     private void applyReduction() {
-        // Reduce particle budget by 20%
         int currentBudget = particleOptimizer.getEffectiveBudget();
         int newBudget = Math.max(100, (int) (currentBudget * 0.8));
         particleOptimizer.setEffectiveBudget(newBudget);
@@ -74,7 +63,6 @@ public class AdaptiveController {
     }
 
     private void applyRelaxation() {
-        // Restore particle budget toward configured value
         int currentBudget = particleOptimizer.getEffectiveBudget();
         int configBudget = config.getParticleBudget();
         if (currentBudget < configBudget) {

@@ -38,10 +38,10 @@ Config is stored at `.minecraft/config/lilt.json`. Edit it directly or change th
 ### Profiles
 
 | Profile | Target FPS | Particle Budget | Particle Cull Distance |
-|---------|-----------|-----------------|----------------------|
-| Low | 30 | 2000 | 64 blocks |
+|---------|-----------|-----------------|------------------------|
+| Low | 30 | 300 | 20 blocks |
 | Balanced | 60 | 1000 | 32 blocks |
-| Performance | 60 | 500 | 24 blocks |
+| Performance | 120 | 2500 | 64 blocks |
 | Custom | User-defined | User-defined | User-defined |
 
 ## Controls

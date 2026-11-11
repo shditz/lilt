@@ -5,9 +5,6 @@ import dev.lilt.config.LiltConfig;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 
-/**
- * Registers and handles Lilt keybindings.
- */
 public class KeyBindings {
 
     private static KeyMapping toggleOverlay;

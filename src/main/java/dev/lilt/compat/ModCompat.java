@@ -8,10 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Detects installed performance mods using Fabric Loader.
- * No direct class references to optional mods.
- */
 public class ModCompat {
 
     private static final String[] KNOWN_MODS = {
@@ -48,12 +44,7 @@ public class ModCompat {
         return Collections.unmodifiableMap(detectedMods);
     }
 
-    /**
-     * Returns true if another mod already handles particle optimization.
-     */
     public boolean isParticleOptimizationHandledExternally() {
-        // Sodium and ImmediatelyFast may handle some particle rendering.
-        // We do NOT disable our optimization by default — we just note it for diagnostics.
         return false;
     }
 }
