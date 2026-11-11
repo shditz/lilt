@@ -173,6 +173,7 @@ public class PerformanceMonitor {
     }
 
     // Getters
+    public LiltConfig getConfig() { return config; }
     public double getCurrentFps() { return currentFps; }
     public double getAverageFps() { return averageFps; }
     public double getFrameTimeMs() { return frameTimeMs; }

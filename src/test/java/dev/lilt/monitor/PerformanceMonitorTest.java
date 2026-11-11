@@ -47,3 +47,4 @@ class PerformanceMonitorTest {
         assertEquals(5.0, monitor.getLastTickTimeMs(), 0.01);
     }
 }
+

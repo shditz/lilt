@@ -64,3 +64,4 @@ class PerformanceDiagnosticsTest {
         assertEquals(PerformanceDiagnostics.PressureType.CPU_BOUND, diagnostics.getCurrentPressure());
     }
 }
+

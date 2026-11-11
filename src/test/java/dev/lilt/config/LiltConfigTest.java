@@ -65,3 +65,4 @@ class LiltConfigTest {
         assertTrue(Files.exists(broken));
     }
 }
+

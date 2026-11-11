@@ -50,7 +50,6 @@ public class LiltConfig {
     private int adaptiveCooldownTicks = 100;
 
     private transient Path configPath;
-    private transient boolean dirty = false;
 
     public LiltConfig() {
         applyProfile();

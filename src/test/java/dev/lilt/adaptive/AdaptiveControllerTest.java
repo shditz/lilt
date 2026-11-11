@@ -39,6 +39,7 @@ class AdaptiveControllerTest {
         for (int i = 0; i < 10; i++) {
             monitor.recordFrame(50_000_000L); // 20 FPS (below target 60)
         }
+        diagnostics.update();
         controller.tick();
         assertEquals(AdaptiveController.AdaptiveState.STABLE, controller.getState());
         assertEquals(1000, particleOptimizer.getEffectiveBudget());
@@ -74,3 +75,4 @@ class AdaptiveControllerTest {
         assertEquals(800, particleOptimizer.getEffectiveBudget());
     }
 }
+
