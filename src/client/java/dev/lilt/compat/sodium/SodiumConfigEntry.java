@@ -3,6 +3,7 @@ package dev.lilt.compat.sodium;
 import dev.lilt.client.LiltClient;
 import dev.lilt.config.LiltConfig;
 import net.caffeinemc.mods.sodium.api.config.ConfigEntryPoint;
+import net.caffeinemc.mods.sodium.api.config.StorageEventHandler;
 import net.caffeinemc.mods.sodium.api.config.structure.ConfigBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -16,8 +17,11 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
             return;
         }
 
+        StorageEventHandler storage = LiltClient::onConfigUpdated;
+
         builder.registerOwnModOptions()
             .setName("Lilt")
+            .setVersion("0.1.0-dev.2")
             .addPage(builder.createOptionPage()
                 .setName(Component.literal("Lilt"))
                 .addOptionGroup(builder.createOptionGroup()
@@ -26,6 +30,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                         .setName(Component.literal("Adaptive Tuning"))
                         .setTooltip(Component.literal("Dynamically reduces particle workload during severe frametime drops to maintain smooth frame pacing."))
                         .setDefaultValue(config.isAdaptiveEnabled())
+                        .setStorageHandler(storage)
                         .setBinding(val -> {
                             config.setAdaptiveEnabled(val);
                             LiltClient.onConfigUpdated();
@@ -37,6 +42,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                         .setRange(30, 240, 10)
                         .setValueFormatter(v -> Component.literal(v + " FPS"))
                         .setDefaultValue(config.getTargetFps())
+                        .setStorageHandler(storage)
                         .setBinding(val -> {
                             config.setTargetFps(val);
                             LiltClient.onConfigUpdated();
@@ -49,6 +55,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                         .setName(Component.literal("Particle Culling"))
                         .setTooltip(Component.literal("Skips rendering of distant particles outside culling radius. Near-camera particles are always preserved."))
                         .setDefaultValue(config.isParticleOptimizationEnabled())
+                        .setStorageHandler(storage)
                         .setBinding(val -> {
                             config.setParticleOptimizationEnabled(val);
                             LiltClient.onConfigUpdated();
@@ -60,6 +67,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                         .setRange(100, 3000, 100)
                         .setValueFormatter(v -> Component.literal(String.valueOf(v)))
                         .setDefaultValue(config.getParticleBudget())
+                        .setStorageHandler(storage)
                         .setBinding(val -> {
                             config.setParticleBudget(val);
                             LiltClient.onConfigUpdated();
@@ -71,6 +79,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                         .setRange(16, 64, 4)
                         .setValueFormatter(v -> Component.literal(v + " blocks"))
                         .setDefaultValue((int) Math.round(Math.sqrt(config.getParticleDistanceCullSq())))
+                        .setStorageHandler(storage)
                         .setBinding(val -> {
                             config.setParticleDistanceCullSq(val * val);
                             LiltClient.onConfigUpdated();
@@ -83,6 +92,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                         .setName(Component.literal("HUD Overlay (F7)"))
                         .setTooltip(Component.literal("Displays live performance telemetry: FPS, frame pacing, tick times, GC pauses, and bottlenecks."))
                         .setDefaultValue(config.isOverlayEnabled())
+                        .setStorageHandler(storage)
                         .setBinding(val -> {
                             config.setOverlayEnabled(val);
                             LiltClient.onConfigUpdated();
