@@ -20,7 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Map;
 import java.util.Queue;
 
-@Mixin(ParticleEngine.class)
+@SuppressWarnings("unused")
+@Mixin(value = ParticleEngine.class, remap = false)
 public abstract class ParticleEngineMixin {
 
     @Shadow
