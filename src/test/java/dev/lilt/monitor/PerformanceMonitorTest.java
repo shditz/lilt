@@ -45,4 +45,13 @@ class PerformanceMonitorTest {
         monitor.recordTick(5_000_000L);
         assertEquals(5.0, monitor.getLastTickTimeMs(), 0.01);
     }
+
+    @Test
+    void testClientTickExecutionVsInterval() {
+        monitor.recordClientTickExecution(3_500_000L);
+        monitor.recordClientTickInterval(49_800_000L);
+
+        assertEquals(3.5, monitor.getClientTickDurationMs(), 0.01);
+        assertEquals(49.8, monitor.getClientTickIntervalMs(), 0.01);
+    }
 }

@@ -43,8 +43,4 @@ public class ModCompat {
     public Map<String, Boolean> getAllDetectedMods() {
         return Collections.unmodifiableMap(detectedMods);
     }
-
-    public boolean isParticleOptimizationHandledExternally() {
-        return false;
-    }
 }

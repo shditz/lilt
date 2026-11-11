@@ -15,7 +15,7 @@ public class PerformanceDiagnostics {
     private static final int MIN_FRAMES_FOR_CLASSIFICATION = 120;
     private static final double HIGH_FRAME_VARIANCE_THRESHOLD = 3.0;
     private static final double MEMORY_PRESSURE_THRESHOLD = 0.85;
-    private static final double TICK_OVERRUN_MS = 50.0;
+    private static final double TICK_EXECUTION_OVERRUN_MS = 45.0;
     private static final double SEVERE_FRAME_TIME_MS = 33.3;
 
     private double measuredGpuTimeMs = -1.0;
@@ -50,14 +50,14 @@ public class PerformanceDiagnostics {
         boolean highVariance = varianceRatio > HIGH_FRAME_VARIANCE_THRESHOLD;
         boolean severeFrameTime = p50 > SEVERE_FRAME_TIME_MS;
 
-        double clientTickMs = monitor.getLastTickDurationMs();
-        boolean clientTickOverrun = clientTickMs > TICK_OVERRUN_MS;
+        double clientTickDurationMs = monitor.getClientTickDurationMs();
+        boolean clientTickOverrun = clientTickDurationMs > TICK_EXECUTION_OVERRUN_MS;
         boolean serverTickOverrun = false;
         double serverTickMs = 0;
 
         if (monitor.isIntegratedServerRunning()) {
             serverTickMs = monitor.getIntegratedServerTickMs();
-            serverTickOverrun = serverTickMs > TICK_OVERRUN_MS;
+            serverTickOverrun = serverTickMs > TICK_EXECUTION_OVERRUN_MS;
         }
 
         if (memoryPressure && frequentGc) {
@@ -68,7 +68,7 @@ public class PerformanceDiagnostics {
             if (serverTickOverrun) {
                 pressureDescription = String.format("Integrated server tick overrun (%.1fms)", serverTickMs);
             } else {
-                pressureDescription = String.format("Client tick overrun (%.1fms)", clientTickMs);
+                pressureDescription = String.format("Client tick execution overrun (%.1fms)", clientTickDurationMs);
             }
         } else if (severeFrameTime) {
             if (gpuTimingSupported && measuredGpuTimeMs > 0) {

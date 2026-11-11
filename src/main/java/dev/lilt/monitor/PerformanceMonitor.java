@@ -16,8 +16,8 @@ public class PerformanceMonitor {
     private int frameCount = 0;
     private volatile boolean metricsDirty = true;
 
-    private long lastTickStartNanos = 0;
-    private long lastClientTickDurationNanos = 0;
+    private long lastClientTickExecutionNanos = 0;
+    private long lastClientTickIntervalNanos = 0;
     private long integratedServerTickNanos = 0;
     private boolean integratedServerRunning = false;
     private long lastFrameNanos = 0;
@@ -60,12 +60,20 @@ public class PerformanceMonitor {
         }
     }
 
+    public void recordClientTickExecution(long durationNanos) {
+        this.lastClientTickExecutionNanos = Math.max(0, durationNanos);
+    }
+
+    public void recordClientTickInterval(long intervalNanos) {
+        this.lastClientTickIntervalNanos = Math.max(0, intervalNanos);
+    }
+
     public void recordTick(long durationNanos) {
-        this.lastClientTickDurationNanos = durationNanos;
+        recordClientTickExecution(durationNanos);
     }
 
     public void recordIntegratedServerTick(long durationNanos) {
-        this.integratedServerTickNanos = durationNanos;
+        this.integratedServerTickNanos = Math.max(0, durationNanos);
         this.integratedServerRunning = true;
     }
 
@@ -89,11 +97,6 @@ public class PerformanceMonitor {
             currentFps = 1_000_000_000.0 / elapsed;
             metricsDirty = true;
         }
-
-        if (lastTickStartNanos > 0) {
-            lastClientTickDurationNanos = now - lastTickStartNanos;
-        }
-        lastTickStartNanos = now;
 
         updateGcMetrics();
         ensureMetricsComputed();
@@ -164,9 +167,11 @@ public class PerformanceMonitor {
     public double getOnePercentLowFps() { ensureMetricsComputed(); return onePercentLowFps; }
     public long getGcCountDelta() { return gcCountDelta; }
     public long getGcTimeDeltaMs() { return gcTimeDeltaMs; }
-    public long getLastTickDurationNanos() { return lastClientTickDurationNanos; }
-    public double getLastTickDurationMs() { return lastClientTickDurationNanos / 1_000_000.0; }
-    public double getLastTickTimeMs() { return getLastTickDurationMs(); }
+    public long getClientTickExecutionNanos() { return lastClientTickExecutionNanos; }
+    public double getClientTickDurationMs() { return lastClientTickExecutionNanos / 1_000_000.0; }
+    public double getClientTickIntervalMs() { return lastClientTickIntervalNanos / 1_000_000.0; }
+    public double getLastTickDurationMs() { return getClientTickDurationMs(); }
+    public double getLastTickTimeMs() { return getClientTickDurationMs(); }
     public double getIntegratedServerTickMs() { return integratedServerTickNanos / 1_000_000.0; }
     public boolean isIntegratedServerRunning() { return integratedServerRunning; }
 

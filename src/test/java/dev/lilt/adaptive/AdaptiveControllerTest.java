@@ -69,4 +69,79 @@ class AdaptiveControllerTest {
         controller.tick();
         assertEquals(800, particleOptimizer.getEffectiveBudget());
     }
+
+    @Test
+    void testMultiStepReductionDownToMinimum() {
+        for (int i = 0; i < 100; i++) {
+            monitor.recordFrame(50_000_000L);
+        }
+
+        int cooldown = config.getAdaptiveCooldownTicks();
+
+        controller.tick();
+        assertEquals(800, particleOptimizer.getEffectiveBudget());
+
+        for (int step = 0; step < 15; step++) {
+            for (int t = 0; t < cooldown; t++) {
+                controller.tick();
+            }
+            controller.tick();
+        }
+
+        assertEquals(100, particleOptimizer.getEffectiveBudget());
+        assertTrue(controller.getLastAction().contains("minimum"));
+    }
+
+    @Test
+    void testRelaxationRecovery() {
+        particleOptimizer.setEffectiveBudget(400);
+
+        for (int i = 0; i < 100; i++) {
+            monitor.recordFrame(16_666_666L);
+        }
+
+        controller.tick();
+        assertTrue(particleOptimizer.getEffectiveBudget() > 400);
+        assertEquals(AdaptiveController.AdaptiveState.RELAXING, controller.getState());
+
+        int cooldown = config.getAdaptiveCooldownTicks();
+        for (int step = 0; step < 15; step++) {
+            for (int t = 0; t < cooldown; t++) {
+                controller.tick();
+            }
+            controller.tick();
+        }
+
+        assertEquals(1000, particleOptimizer.getEffectiveBudget());
+        assertEquals(AdaptiveController.AdaptiveState.STABLE, controller.getState());
+    }
+
+    @Test
+    void testDiagnosticCpuBoundSuppressesParticleReduction() {
+        for (int i = 0; i < 150; i++) {
+            monitor.recordFrame(50_000_000L);
+        }
+        monitor.recordClientTickExecution(60_000_000L);
+        diagnostics.update();
+        assertEquals(PerformanceDiagnostics.PressureType.CPU_BOUND, diagnostics.getCurrentPressure());
+
+        controller.tick();
+        assertEquals(1000, particleOptimizer.getEffectiveBudget());
+        assertEquals(AdaptiveController.AdaptiveState.STABLE, controller.getState());
+        assertTrue(controller.getLastAction().contains("Suppressed reduction"));
+    }
+
+    @Test
+    void testCappedFramerateMatchesTarget() {
+        controller.setUserFramerateCap(30);
+        assertEquals(30, controller.getEffectiveTargetFps());
+
+        for (int i = 0; i < 100; i++) {
+            monitor.recordFrame(33_333_333L);
+        }
+
+        controller.tick();
+        assertEquals(1000, particleOptimizer.getEffectiveBudget());
+        assertEquals(AdaptiveController.AdaptiveState.STABLE, controller.getState());
+    }
 }

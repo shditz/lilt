@@ -75,4 +75,19 @@ class ParticleOptimizerTest {
         assertTrue(optimizer.shouldAllowParticle(99999.0));
         assertTrue(optimizer.shouldAllowParticle(99999.0));
     }
+
+    @Test
+    void testBudgetClampingAndRecovery() {
+        optimizer.setEffectiveBudget(10);
+        assertEquals(50, optimizer.getEffectiveBudget());
+
+        optimizer.setEffectiveBudget(500);
+        assertEquals(500, optimizer.getEffectiveBudget());
+
+        optimizer.updateParticleCount(300);
+        assertEquals(300, optimizer.getCurrentParticleCount());
+
+        optimizer.updateParticleCount(150);
+        assertEquals(150, optimizer.getCurrentParticleCount());
+    }
 }

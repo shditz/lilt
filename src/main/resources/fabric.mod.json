@@ -11,7 +11,6 @@
     "issues": "https://github.com/lilt-mc/lilt/issues"
   },
   "license": "MIT",
-  "icon": "assets/lilt/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["dev.lilt.client.LiltClient"],
@@ -20,7 +19,7 @@
   "mixins": ["lilt.mixins.json"],
   "depends": {
     "fabricloader": ">=0.19.5",
-    "minecraft": ">=26.3",
+    "minecraft": "=26.3",
     "java": ">=25",
     "fabric-api": "*"
   },

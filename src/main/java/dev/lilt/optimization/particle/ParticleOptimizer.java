@@ -22,15 +22,11 @@ public class ParticleOptimizer {
     }
 
     public boolean shouldAllowParticle(double distanceSqToCamera) {
-        return shouldAllowParticle(distanceSqToCamera, false);
-    }
-
-    public boolean shouldAllowParticle(double distanceSqToCamera, boolean isCritical) {
         if (!config.isParticleOptimizationEnabled()) {
             return true;
         }
 
-        if (isCritical || Double.isNaN(distanceSqToCamera) || distanceSqToCamera <= NEAR_PROTECT_DISTANCE_SQ) {
+        if (Double.isNaN(distanceSqToCamera) || distanceSqToCamera <= NEAR_PROTECT_DISTANCE_SQ) {
             currentParticleCount++;
             return true;
         }
@@ -64,14 +60,27 @@ public class ParticleOptimizer {
         this.rejectedThisTick = 0;
     }
 
-    public int getEffectiveBudget() { return effectiveBudget; }
-    
+    public int getEffectiveBudget() {
+        return effectiveBudget;
+    }
+
     public void setEffectiveBudget(int budget) {
         this.effectiveBudget = Math.max(50, budget);
     }
 
-    public int getCurrentParticleCount() { return currentParticleCount; }
-    public int getRejectedThisTick() { return rejectedThisTick; }
-    public int getTotalRejected() { return totalRejected; }
-    public boolean isActive() { return config.isParticleOptimizationEnabled(); }
+    public int getCurrentParticleCount() {
+        return currentParticleCount;
+    }
+
+    public int getRejectedThisTick() {
+        return rejectedThisTick;
+    }
+
+    public int getTotalRejected() {
+        return totalRejected;
+    }
+
+    public boolean isActive() {
+        return config.isParticleOptimizationEnabled();
+    }
 }

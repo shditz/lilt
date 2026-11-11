@@ -15,6 +15,12 @@ public abstract class MinecraftMixin {
     @Unique
     private static long lilt$lastRenderFrameNanos = 0;
 
+    @Unique
+    private static long lilt$clientTickStartNanos = 0;
+
+    @Unique
+    private static long lilt$lastClientTickStartNanos = 0;
+
     @Inject(method = "renderFrame", at = @At("HEAD"))
     private void lilt$onRenderFrame(boolean renderLevel, CallbackInfo ci) {
         long now = System.nanoTime();
@@ -22,5 +28,23 @@ public abstract class MinecraftMixin {
             LiltClient.getMonitor().recordFrame(now - lilt$lastRenderFrameNanos);
         }
         lilt$lastRenderFrameNanos = now;
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void lilt$onTickStart(CallbackInfo ci) {
+        long now = System.nanoTime();
+        lilt$clientTickStartNanos = now;
+        if (lilt$lastClientTickStartNanos > 0 && LiltClient.getMonitor() != null) {
+            LiltClient.getMonitor().recordClientTickInterval(now - lilt$lastClientTickStartNanos);
+        }
+        lilt$lastClientTickStartNanos = now;
+    }
+
+    @Inject(method = "tick", at = @At("RETURN"))
+    private void lilt$onTickReturn(CallbackInfo ci) {
+        long now = System.nanoTime();
+        if (lilt$clientTickStartNanos > 0 && LiltClient.getMonitor() != null) {
+            LiltClient.getMonitor().recordClientTickExecution(now - lilt$clientTickStartNanos);
+        }
     }
 }

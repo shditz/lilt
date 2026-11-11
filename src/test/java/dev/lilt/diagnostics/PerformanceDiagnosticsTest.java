@@ -32,7 +32,19 @@ class PerformanceDiagnosticsTest {
         for (int i = 0; i < 150; i++) {
             monitor.recordFrame(16_666_666L);
         }
-        monitor.recordTick(10_000_000L);
+        monitor.recordClientTickExecution(10_000_000L);
+
+        diagnostics.update();
+        assertEquals(PerformanceDiagnostics.PressureType.NONE, diagnostics.getCurrentPressure());
+    }
+
+    @Test
+    void testNormalTickIntervalDoesNotTriggerCpuBound() {
+        for (int i = 0; i < 150; i++) {
+            monitor.recordFrame(16_666_666L);
+        }
+        monitor.recordClientTickExecution(3_000_000L);
+        monitor.recordClientTickInterval(50_000_000L);
 
         diagnostics.update();
         assertEquals(PerformanceDiagnostics.PressureType.NONE, diagnostics.getCurrentPressure());
@@ -43,7 +55,7 @@ class PerformanceDiagnosticsTest {
         for (int i = 0; i < 150; i++) {
             monitor.recordFrame(50_000_000L);
         }
-        monitor.recordTick(5_000_000L);
+        monitor.recordClientTickExecution(5_000_000L);
 
         diagnostics.update();
         assertEquals(PerformanceDiagnostics.PressureType.UNKNOWN, diagnostics.getCurrentPressure());
@@ -55,7 +67,7 @@ class PerformanceDiagnosticsTest {
         for (int i = 0; i < 150; i++) {
             monitor.recordFrame(50_000_000L);
         }
-        monitor.recordTick(5_000_000L);
+        monitor.recordClientTickExecution(5_000_000L);
         diagnostics.setGpuTimingMeasurement(45.0);
 
         diagnostics.update();
@@ -68,7 +80,7 @@ class PerformanceDiagnosticsTest {
         for (int i = 0; i < 150; i++) {
             monitor.recordFrame(50_000_000L);
         }
-        monitor.recordTick(65_000_000L);
+        monitor.recordClientTickExecution(65_000_000L);
 
         diagnostics.update();
         assertEquals(PerformanceDiagnostics.PressureType.CPU_BOUND, diagnostics.getCurrentPressure());

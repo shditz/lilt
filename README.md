@@ -8,12 +8,12 @@ Built for Fabric, targeting Minecraft 26.3.
 
 ## Features
 
-- **Performance monitoring** — FPS, frame times (P50/P95/P99), 1% lows, GC activity, tick timing
-- **Performance overlay** — toggleable HUD showing live metrics (F7)
-- **Hardware detection** — CPU cores, GPU info, JVM heap, GL capabilities
+- **Performance monitoring** — FPS, frame presentation intervals (P50/P95/P99), 1% lows, GC activity, client tick execution timing
+- **Performance overlay** — low-overhead toggleable HUD showing live metrics (F7)
+- **Hardware detection** — CPU cores, GPU info, JVM heap, graphics backend
 - **Performance diagnostics** — classifies pressure as CPU-bound, GPU-bound, memory, or mixed
-- **Adaptive controller** — adjusts Lilt's own settings based on real performance data
-- **Particle optimization** — budget-based particle management with distance culling
+- **Adaptive controller** — conservative multi-step workload adjustment with hysteresis and cooldowns
+- **Particle optimization** — budget-based particle management with distance culling and near-player protection
 - **Mod compatibility** — detects Sodium, Lithium, Iris, and other performance mods
 - **Configuration profiles** — Low, Balanced (default), Performance, Custom
 - **Persistent JSON config** — schema versioning, validation, safe recovery
@@ -28,12 +28,12 @@ Built for Fabric, targeting Minecraft 26.3.
 ## Installation
 
 1. Install Fabric Loader for Minecraft 26.3
-2. Drop `lilt-0.1.0-dev.1.jar` into your `mods/` folder
+2. Drop `lilt-0.1.0-dev.2.jar` into your `mods/` folder
 3. Launch the game
 
 ## Configuration
 
-Config is stored at `.minecraft/config/lilt.json`. Edit it directly or change the profile in-game.
+Config is stored at `.minecraft/config/lilt.json`. Edit it directly to adjust settings or switch active profiles.
 
 ### Profiles
 
@@ -52,7 +52,7 @@ Config is stored at `.minecraft/config/lilt.json`. Edit it directly or change th
 
 ## Compatibility
 
-Lilt checks for installed performance mods and avoids conflicting optimizations:
+Lilt detects installed performance mods and coordinates optimizations without hard dependencies:
 
 - Sodium — compatible
 - Iris — compatible
@@ -70,9 +70,8 @@ No mandatory dependency on any of these mods.
 ./gradlew build
 ```
 
-Output JAR: `build/libs/lilt-0.1.0-dev.1.jar`
+Output JAR: `build/libs/lilt-0.1.0-dev.2.jar`
 
 ## License
 
 MIT
-

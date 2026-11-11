@@ -81,6 +81,10 @@ public class LiltClient implements ClientModInitializer {
                 diagnostics.update();
 
                 if (config.isAdaptiveEnabled()) {
+                    try {
+                        adaptiveController.setUserFramerateCap(client.options.framerateLimit().get());
+                    } catch (Throwable ignored) {
+                    }
                     adaptiveController.tick();
                 }
             }

@@ -14,21 +14,21 @@ dev.lilt
 ├── hardware
 │   └── HardwareInfo     — CPU/GPU/JVM detection
 ├── monitor
-│   └── PerformanceMonitor — Frame timing, FPS, GC tracking
+│   └── PerformanceMonitor — Frame timing, FPS, GC tracking, tick execution duration
 ├── diagnostics
 │   └── PerformanceDiagnostics — Pressure classification
 ├── adaptive
-│   └── AdaptiveController — Automatic tuning with hysteresis
+│   └── AdaptiveController — Automatic tuning with hysteresis, multi-step adjustments, diagnostic checks
 ├── optimization
 │   └── particle
 │       └── ParticleOptimizer — Budget and distance culling
 ├── compat
 │   └── ModCompat        — Fabric Loader mod detection
 ├── ui
-│   ├── OverlayRenderer  — HUD rendering
+│   ├── OverlayRenderer  — Cached HUD rendering
 │   └── KeyBindings      — Key registration
 └── mixin
-    ├── MinecraftMixin   — Render loop frame interval hook
+    ├── MinecraftMixin   — Render loop frame interval and tick duration hooks
     └── ParticleEngineMixin — Particle lifecycle & budget integration
 ```
 
@@ -58,7 +58,7 @@ PerformanceMonitor (frame intervals, ticks, GC)
 PerformanceDiagnostics (evidence-based pressure classification)
         │
         ▼
-AdaptiveController (adjusts particle budget)
+AdaptiveController (checks pressure relevance, adjusts particle budget)
         │
         ▼
 ParticleOptimizer (budget & distance decisions)
@@ -70,7 +70,7 @@ ParticleEngineMixin (budget enforcement & lifecycle sync)
 ## Mixin Strategy
 
 - `@Inject` only — zero `@Overwrite` or invasive redirects
-- `MinecraftMixin` — non-invasive hook on `renderFrame` to measure frame presentation intervals
+- `MinecraftMixin` — non-invasive hook on `renderFrame` to measure frame presentation intervals, and on `tick` to measure client tick execution duration and inter-tick interval
 - `ParticleEngineMixin` — intercepts `createParticle` for budget and distance culling, synchronizes active counts on `tick`, and resets on world unload
 
 ## Configuration
@@ -80,4 +80,3 @@ JSON-based, stored at `.minecraft/config/lilt.json`. Schema version tracks break
 ## Compatibility
 
 Uses `FabricLoader.isModLoaded()` for detection. No class-level references to optional mods. Overlapping features can be conditionally disabled.
-
