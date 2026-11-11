@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "lilt",
+  "version": "${version}",
+  "name": "Lilt",
+  "description": "A client-side performance mod that monitors how the game runs and helps tune workloads to keep gameplay responsive.",
+  "authors": ["Lilt Contributors"],
+  "contact": {
+    "homepage": "https://github.com/lilt-mc/lilt",
+    "sources": "https://github.com/lilt-mc/lilt",
+    "issues": "https://github.com/lilt-mc/lilt/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/lilt/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.lilt.client.LiltClient"],
+    "main": ["dev.lilt.LiltMod"]
+  },
+  "mixins": ["lilt.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": ">=26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "sodium": "*",
+    "lithium": "*"
+  }
+}
