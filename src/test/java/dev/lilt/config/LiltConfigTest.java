@@ -45,10 +45,13 @@ class LiltConfigTest {
         LiltConfig config = LiltConfig.load(configFile);
         config.setOverlayEnabled(true);
         config.setParticleBudget(750);
+        config.setParticleDistanceCullSq(576.0);
 
         LiltConfig reloaded = LiltConfig.load(configFile);
         assertTrue(reloaded.isOverlayEnabled());
         assertEquals(750, reloaded.getParticleBudget());
+        assertEquals(576.0, reloaded.getParticleDistanceCullSq());
+        assertEquals("custom", reloaded.getActiveProfile());
     }
 
     @Test

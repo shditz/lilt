@@ -96,11 +96,14 @@ public class OverlayRenderer implements HudElement {
         textY += ROW_HEIGHT;
 
         String renderer = hardwareInfo.getGpuRenderer();
+        if (renderer == null || renderer.isBlank()) renderer = "unavailable";
         if (renderer.length() > 28) renderer = renderer.substring(0, 25) + "...";
         graphics.text(font, "GPU: " + renderer, textX, textY, COLOR_TEXT_MUTED);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, "API: " + hardwareInfo.getGraphicsBackend(), textX, textY, COLOR_TEXT_MUTED);
+        String backend = hardwareInfo.getGraphicsBackend();
+        if (backend == null || backend.isBlank()) backend = "unavailable";
+        graphics.text(font, "API: " + backend, textX, textY, COLOR_TEXT_MUTED);
         textY += ROW_HEIGHT;
 
         PerformanceDiagnostics.PressureType pressure = diagnostics.getCurrentPressure();

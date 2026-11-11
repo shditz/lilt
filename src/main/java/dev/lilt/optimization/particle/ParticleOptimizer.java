@@ -30,7 +30,7 @@ public class ParticleOptimizer {
             return true;
         }
 
-        if (isCritical || distanceSqToCamera <= NEAR_PROTECT_DISTANCE_SQ) {
+        if (isCritical || Double.isNaN(distanceSqToCamera) || distanceSqToCamera <= NEAR_PROTECT_DISTANCE_SQ) {
             currentParticleCount++;
             return true;
         }

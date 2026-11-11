@@ -85,10 +85,11 @@ public abstract class ParticleEngineMixin {
         if (optimizer == null || !optimizer.isActive()) return;
 
         Minecraft client = Minecraft.getInstance();
-        if (client.player != null) {
-            double dx = x - client.player.getX();
-            double dy = y - client.player.getY();
-            double dz = z - client.player.getZ();
+        net.minecraft.world.entity.Entity camera = client.getCameraEntity() != null ? client.getCameraEntity() : client.player;
+        if (camera != null) {
+            double dx = x - camera.getX();
+            double dy = y - camera.getY();
+            double dz = z - camera.getZ();
             double distSq = dx * dx + dy * dy + dz * dz;
 
             if (!optimizer.shouldAllowParticle(distSq)) {

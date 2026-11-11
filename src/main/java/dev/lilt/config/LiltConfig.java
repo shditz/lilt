@@ -184,6 +184,13 @@ public class LiltConfig {
         save();
     }
 
+    public void setParticleDistanceCullSq(double distSq) {
+        this.particleDistanceCullSq = distSq;
+        this.activeProfile = "custom";
+        validate();
+        save();
+    }
+
     public void setParticleOptimizationEnabled(boolean enabled) {
         this.particleOptimizationEnabled = enabled;
         save();

@@ -51,6 +51,7 @@ class ParticleOptimizerTest {
 
         assertTrue(optimizer.shouldAllowParticle(25.0));
         assertTrue(optimizer.shouldAllowParticle(4.0));
+        assertTrue(optimizer.shouldAllowParticle(Double.NaN));
         assertEquals(0, optimizer.getRejectedThisTick());
     }
 
