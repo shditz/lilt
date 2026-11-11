@@ -3,7 +3,7 @@
   "id": "lilt",
   "version": "${version}",
   "name": "Lilt",
-  "description": "A client-side performance mod that monitors how the game runs and helps tune workloads to keep gameplay responsive.",
+  "description": "Client-side performance monitor and workload stabilizer. Keeps framerates steady during intense scenes by managing particle strain, tracking frame intervals, and diagnosing bottlenecks.",
   "authors": ["Lilt Contributors"],
   "contact": {
     "homepage": "https://github.com/lilt-mc/lilt",
@@ -11,6 +11,7 @@
     "issues": "https://github.com/lilt-mc/lilt/issues"
   },
   "license": "MIT",
+  "icon": "assets/lilt/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["dev.lilt.client.LiltClient"],

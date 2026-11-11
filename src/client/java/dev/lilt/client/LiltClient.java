@@ -59,9 +59,10 @@ public class LiltClient implements ClientModInitializer {
         KeyBindings.register();
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (screen instanceof VideoSettingsScreen ||
-                screen instanceof OptionsScreen ||
-                screen.getClass().getSimpleName().contains("VideoSettings")) {
+            boolean isVideoSettings = screen instanceof VideoSettingsScreen ||
+                screen.getClass().getSimpleName().toLowerCase().contains("videosetting") ||
+                screen.getClass().getSimpleName().toLowerCase().contains("sodiumoptions");
+            if (isVideoSettings) {
                 int buttonWidth = 95;
                 int buttonHeight = 20;
                 int x = screen.width - buttonWidth - 6;
