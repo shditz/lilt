@@ -14,12 +14,6 @@ import dev.lilt.ui.OverlayRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.Screens;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
-import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public class LiltClient implements ClientModInitializer {
@@ -57,23 +51,6 @@ public class LiltClient implements ClientModInitializer {
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("lilt", "performance_overlay"), overlayRenderer);
         KeyBindings.register();
-
-        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            boolean isVideoSettings = screen instanceof VideoSettingsScreen ||
-                screen.getClass().getSimpleName().toLowerCase().contains("videosetting") ||
-                screen.getClass().getSimpleName().toLowerCase().contains("sodiumoptions");
-            if (isVideoSettings) {
-                int buttonWidth = 95;
-                int buttonHeight = 20;
-                int x = screen.width - buttonWidth - 6;
-                int y = 6;
-                Button liltBtn = Button.builder(
-                    Component.literal("Lilt Options..."),
-                    btn -> client.setScreenAndShow(new LiltConfigScreen(screen, config))
-                ).bounds(x, y, buttonWidth, buttonHeight).build();
-                Screens.getWidgets(screen).add(liltBtn);
-            }
-        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null && !inGameInitialized) {

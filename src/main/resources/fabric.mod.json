@@ -15,7 +15,8 @@
   "environment": "client",
   "entrypoints": {
     "client": ["dev.lilt.client.LiltClient"],
-    "main": ["dev.lilt.LiltMod"]
+    "main": ["dev.lilt.LiltMod"],
+    "sodium:config_api_user": ["dev.lilt.compat.sodium.SodiumConfigEntry"]
   },
   "mixins": ["lilt.mixins.json"],
   "depends": {
