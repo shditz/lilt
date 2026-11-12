@@ -40,9 +40,15 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         }
 
         @SuppressWarnings("unchecked")
-        final CycleButton<Integer>[] fpsHolder = (CycleButton<Integer>[]) new CycleButton<?>[1];
-        @SuppressWarnings("unchecked")
         final CycleButton<Boolean>[] adaptiveHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
+        @SuppressWarnings("unchecked")
+        final CycleButton<Boolean>[] animLodHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
+        @SuppressWarnings("unchecked")
+        final CycleButton<Boolean>[] texCullHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
+        @SuppressWarnings("unchecked")
+        final CycleButton<Boolean>[] tickGuardHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
+        @SuppressWarnings("unchecked")
+        final CycleButton<Boolean>[] gcGuardHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
         @SuppressWarnings("unchecked")
         final CycleButton<Boolean>[] particleHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
         @SuppressWarnings("unchecked")
@@ -58,8 +64,11 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             (btn, val) -> {
                 config.setActiveProfile(val);
                 LiltClient.onConfigUpdated();
-                if (fpsHolder[0] != null) fpsHolder[0].setValue(config.getTargetFps());
                 if (adaptiveHolder[0] != null) adaptiveHolder[0].setValue(config.isAdaptiveEnabled());
+                if (animLodHolder[0] != null) animLodHolder[0].setValue(config.isAnimationLodEnabled());
+                if (texCullHolder[0] != null) texCullHolder[0].setValue(config.isTextureCullingEnabled());
+                if (tickGuardHolder[0] != null) tickGuardHolder[0].setValue(config.isTickBurstProtectionEnabled());
+                if (gcGuardHolder[0] != null) gcGuardHolder[0].setValue(config.isGcGuardEnabled());
                 if (particleHolder[0] != null) particleHolder[0].setValue(config.isParticleOptimizationEnabled());
                 if (budgetHolder[0] != null) budgetHolder[0].setValue(config.getParticleBudget());
                 if (distHolder[0] != null) distHolder[0].setValue((int) Math.round(Math.sqrt(config.getParticleDistanceCullSq())));
@@ -68,28 +77,6 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         profileBtn.setTooltip(Tooltip.create(Component.literal(
             "Balanced: Recommended default baseline.\nLow: Maximum FPS savings on budget hardware.\nPerformance: High fidelity for strong GPUs.\nCustom: Preserves your manual adjustments."
         )));
-
-        List<Integer> fpsOptions = List.of(30, 60, 75, 120, 144, 240, 260);
-        int currentFps = config.getTargetFps();
-        int targetFps = fpsOptions.contains(currentFps) ? currentFps : 60;
-        CycleButton<Integer> fpsBtn = CycleButton.builder(
-            val -> Component.literal(val >= 260 ? "Unlimited" : val + " FPS"),
-            targetFps
-        ).withValues(fpsOptions).create(
-            Component.literal("Target FPS"),
-            (btn, val) -> {
-                config.setTargetFps(val);
-                config.setActiveProfile("custom");
-                profileBtn.setValue("custom");
-                LiltClient.onConfigUpdated();
-            }
-        );
-        fpsBtn.setTooltip(Tooltip.create(Component.literal(
-            "Framerate threshold used by Adaptive Tuning to detect frame drops."
-        )));
-        fpsHolder[0] = fpsBtn;
-
-        this.list.addSmall(profileBtn, fpsBtn);
 
         CycleButton<Boolean> adaptiveBtn = CycleButton.onOffBuilder(config.isAdaptiveEnabled()).create(
             Component.literal("Adaptive Tuning"),
@@ -105,6 +92,68 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         )));
         adaptiveHolder[0] = adaptiveBtn;
 
+        this.list.addSmall(profileBtn, adaptiveBtn);
+
+        CycleButton<Boolean> animLodBtn = CycleButton.onOffBuilder(config.isAnimationLodEnabled()).create(
+            Component.literal("Animation LOD"),
+            (btn, val) -> {
+                config.setAnimationLodEnabled(val);
+                config.setActiveProfile("custom");
+                profileBtn.setValue("custom");
+                LiltClient.onConfigUpdated();
+            }
+        );
+        animLodBtn.setTooltip(Tooltip.create(Component.literal(
+            "Throttles distant entity model animations based on distance. Greatly improves FPS in villages and farms."
+        )));
+        animLodHolder[0] = animLodBtn;
+
+        CycleButton<Boolean> texCullBtn = CycleButton.onOffBuilder(config.isTextureCullingEnabled()).create(
+            Component.literal("Texture Optimization"),
+            (btn, val) -> {
+                config.setTextureCullingEnabled(val);
+                config.setActiveProfile("custom");
+                profileBtn.setValue("custom");
+                LiltClient.onConfigUpdated();
+            }
+        );
+        texCullBtn.setTooltip(Tooltip.create(Component.literal(
+            "Throttles animated texture buffer uploads across PCIe during frametime spikes and while paused."
+        )));
+        texCullHolder[0] = texCullBtn;
+
+        this.list.addSmall(animLodBtn, texCullBtn);
+
+        CycleButton<Boolean> tickGuardBtn = CycleButton.onOffBuilder(config.isTickBurstProtectionEnabled()).create(
+            Component.literal("Tick Burst Limiter"),
+            (btn, val) -> {
+                config.setTickBurstProtectionEnabled(val);
+                config.setActiveProfile("custom");
+                profileBtn.setValue("custom");
+                LiltClient.onConfigUpdated();
+            }
+        );
+        tickGuardBtn.setTooltip(Tooltip.create(Component.literal(
+            "Prevents singleplayer internal server catch-up tick bursts from locking the CPU and freezing rendering."
+        )));
+        tickGuardHolder[0] = tickGuardBtn;
+
+        CycleButton<Boolean> gcGuardBtn = CycleButton.onOffBuilder(config.isGcGuardEnabled()).create(
+            Component.literal("Memory Guard"),
+            (btn, val) -> {
+                config.setGcGuardEnabled(val);
+                config.setActiveProfile("custom");
+                profileBtn.setValue("custom");
+                LiltClient.onConfigUpdated();
+            }
+        );
+        gcGuardBtn.setTooltip(Tooltip.create(Component.literal(
+            "Proactively triggers garbage collection while paused if memory pressure is high to prevent in-game freezes."
+        )));
+        gcGuardHolder[0] = gcGuardBtn;
+
+        this.list.addSmall(tickGuardBtn, gcGuardBtn);
+
         CycleButton<Boolean> particleBtn = CycleButton.onOffBuilder(config.isParticleOptimizationEnabled()).create(
             Component.literal("Particle Culling"),
             (btn, val) -> {
@@ -118,8 +167,6 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             "Skips rendering of distant particles outside culling range. Near-camera particles are always preserved."
         )));
         particleHolder[0] = particleBtn;
-
-        this.list.addSmall(adaptiveBtn, particleBtn);
 
         List<Integer> budgetOptions = List.of(100, 300, 500, 1000, 1500, 2500);
         int currentBudget = config.getParticleBudget();
@@ -141,6 +188,8 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         )));
         budgetHolder[0] = budgetBtn;
 
+        this.list.addSmall(particleBtn, budgetBtn);
+
         List<Integer> distOptions = List.of(16, 20, 32, 48, 64);
         int currentDist = (int) Math.round(Math.sqrt(config.getParticleDistanceCullSq()));
         int dist = distOptions.contains(currentDist) ? currentDist : 32;
@@ -161,8 +210,6 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         )));
         distHolder[0] = distBtn;
 
-        this.list.addSmall(budgetBtn, distBtn);
-
         CycleButton<Boolean> hudBtn = CycleButton.onOffBuilder(config.isOverlayEnabled()).create(
             Component.literal("HUD Overlay (F7)"),
             (btn, val) -> {
@@ -174,12 +221,17 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             "Displays live telemetry overlay: FPS, pacing, tick time, GC pauses, and bottleneck diagnosis."
         )));
 
+        this.list.addSmall(distBtn, hudBtn);
+
         Button resetBtn = Button.builder(Component.literal("Reset Defaults"), btn -> {
             config.setActiveProfile("balanced");
             LiltClient.onConfigUpdated();
             profileBtn.setValue("balanced");
-            if (fpsHolder[0] != null) fpsHolder[0].setValue(config.getTargetFps());
             if (adaptiveHolder[0] != null) adaptiveHolder[0].setValue(config.isAdaptiveEnabled());
+            if (animLodHolder[0] != null) animLodHolder[0].setValue(config.isAnimationLodEnabled());
+            if (texCullHolder[0] != null) texCullHolder[0].setValue(config.isTextureCullingEnabled());
+            if (tickGuardHolder[0] != null) tickGuardHolder[0].setValue(config.isTickBurstProtectionEnabled());
+            if (gcGuardHolder[0] != null) gcGuardHolder[0].setValue(config.isGcGuardEnabled());
             if (particleHolder[0] != null) particleHolder[0].setValue(config.isParticleOptimizationEnabled());
             if (budgetHolder[0] != null) budgetHolder[0].setValue(config.getParticleBudget());
             if (distHolder[0] != null) distHolder[0].setValue((int) Math.round(Math.sqrt(config.getParticleDistanceCullSq())));
@@ -188,6 +240,6 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             "Restores all Lilt settings back to the default Balanced profile."
         )));
 
-        this.list.addSmall(hudBtn, resetBtn);
+        this.list.addSmall(resetBtn, null);
     }
 }

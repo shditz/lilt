@@ -17,9 +17,12 @@ class LiltConfigTest {
         assertEquals("balanced", config.getActiveProfile());
         assertFalse(config.isOverlayEnabled());
         assertTrue(config.isAdaptiveEnabled());
-        assertEquals(60, config.getTargetFps());
         assertTrue(config.isParticleOptimizationEnabled());
         assertEquals(1000, config.getParticleBudget());
+        assertTrue(config.isAnimationLodEnabled());
+        assertTrue(config.isTextureCullingEnabled());
+        assertTrue(config.isTickBurstProtectionEnabled());
+        assertTrue(config.isGcGuardEnabled());
         assertTrue(config.isDiagnosticsEnabled());
     }
 
@@ -31,12 +34,12 @@ class LiltConfigTest {
         config.setActiveProfile("performance");
         assertEquals("performance", config.getActiveProfile());
         assertEquals(2500, config.getParticleBudget());
-        assertEquals(120, config.getTargetFps());
+        assertTrue(config.isAnimationLodEnabled());
 
         config.setActiveProfile("low");
         assertEquals("low", config.getActiveProfile());
         assertEquals(300, config.getParticleBudget());
-        assertEquals(30, config.getTargetFps());
+        assertTrue(config.isAnimationLodEnabled());
     }
 
     @Test
@@ -46,11 +49,19 @@ class LiltConfigTest {
         config.setOverlayEnabled(true);
         config.setParticleBudget(750);
         config.setParticleDistanceCullSq(576.0);
+        config.setAnimationLodEnabled(false);
+        config.setTextureCullingEnabled(false);
+        config.setTickBurstProtectionEnabled(false);
+        config.setGcGuardEnabled(false);
 
         LiltConfig reloaded = LiltConfig.load(configFile);
         assertTrue(reloaded.isOverlayEnabled());
         assertEquals(750, reloaded.getParticleBudget());
         assertEquals(576.0, reloaded.getParticleDistanceCullSq());
+        assertFalse(reloaded.isAnimationLodEnabled());
+        assertFalse(reloaded.isTextureCullingEnabled());
+        assertFalse(reloaded.isTickBurstProtectionEnabled());
+        assertFalse(reloaded.isGcGuardEnabled());
         assertEquals("custom", reloaded.getActiveProfile());
     }
 

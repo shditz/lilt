@@ -1,7 +1,10 @@
 package dev.lilt.mixin;
 
 import dev.lilt.client.LiltClient;
+import dev.lilt.optimization.memory.GcGuard;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,6 +48,13 @@ public abstract class MinecraftMixin {
         long now = System.nanoTime();
         if (lilt$clientTickStartNanos > 0 && LiltClient.getMonitor() != null) {
             LiltClient.getMonitor().recordClientTickExecution(now - lilt$clientTickStartNanos);
+        }
+    }
+
+    @Inject(method = "setScreenAndShow", at = @At("HEAD"))
+    private void lilt$onSetScreen(Screen screen, CallbackInfo ci) {
+        if (screen instanceof PauseScreen) {
+            GcGuard.tryProactiveGc();
         }
     }
 }

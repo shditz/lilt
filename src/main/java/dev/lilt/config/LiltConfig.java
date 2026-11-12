@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 public class LiltConfig {
 
-    private static final int SCHEMA_VERSION = 1;
+    private static final int SCHEMA_VERSION = 2;
     private static final String CONFIG_FILE = "lilt.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -20,10 +20,13 @@ public class LiltConfig {
     private String activeProfile = "balanced";
     private boolean overlayEnabled = false;
     private boolean adaptiveEnabled = true;
-    private int targetFps = 60;
     private boolean particleOptimizationEnabled = true;
     private int particleBudget = 1000;
     private double particleDistanceCullSq = 1024.0;
+    private boolean animationLodEnabled = true;
+    private boolean textureCullingEnabled = true;
+    private boolean tickBurstProtectionEnabled = true;
+    private boolean gcGuardEnabled = true;
     private int monitorWindowSize = 600;
     private boolean diagnosticsEnabled = true;
     private double adaptiveHysteresisLow = 0.85;
@@ -83,10 +86,13 @@ public class LiltConfig {
         migrated.activeProfile = old.activeProfile;
         migrated.overlayEnabled = old.overlayEnabled;
         migrated.adaptiveEnabled = old.adaptiveEnabled;
-        migrated.targetFps = old.targetFps;
         migrated.particleOptimizationEnabled = old.particleOptimizationEnabled;
         migrated.particleBudget = old.particleBudget;
         migrated.particleDistanceCullSq = old.particleDistanceCullSq;
+        migrated.animationLodEnabled = old.animationLodEnabled;
+        migrated.textureCullingEnabled = old.textureCullingEnabled;
+        migrated.tickBurstProtectionEnabled = old.tickBurstProtectionEnabled;
+        migrated.gcGuardEnabled = old.gcGuardEnabled;
         return migrated;
     }
 
@@ -101,7 +107,6 @@ public class LiltConfig {
         }
         activeProfile = lower;
 
-        targetFps = Math.max(15, Math.min(targetFps, 300));
         particleBudget = Math.max(50, Math.min(particleBudget, 10000));
         particleDistanceCullSq = Math.max(64.0, Math.min(particleDistanceCullSq, 16384.0));
         monitorWindowSize = Math.max(60, Math.min(monitorWindowSize, 1200));
@@ -115,17 +120,26 @@ public class LiltConfig {
             case "low" -> {
                 particleBudget = 300;
                 particleDistanceCullSq = 400.0;
-                targetFps = 30;
+                animationLodEnabled = true;
+                textureCullingEnabled = true;
+                tickBurstProtectionEnabled = true;
+                gcGuardEnabled = true;
             }
             case "balanced" -> {
                 particleBudget = 1000;
                 particleDistanceCullSq = 1024.0;
-                targetFps = 60;
+                animationLodEnabled = true;
+                textureCullingEnabled = true;
+                tickBurstProtectionEnabled = true;
+                gcGuardEnabled = true;
             }
             case "performance" -> {
                 particleBudget = 2500;
                 particleDistanceCullSq = 4096.0;
-                targetFps = 120;
+                animationLodEnabled = true;
+                textureCullingEnabled = true;
+                tickBurstProtectionEnabled = true;
+                gcGuardEnabled = true;
             }
         }
     }
@@ -143,10 +157,13 @@ public class LiltConfig {
     public String getActiveProfile() { return activeProfile; }
     public boolean isOverlayEnabled() { return overlayEnabled; }
     public boolean isAdaptiveEnabled() { return adaptiveEnabled; }
-    public int getTargetFps() { return targetFps; }
     public boolean isParticleOptimizationEnabled() { return particleOptimizationEnabled; }
     public int getParticleBudget() { return particleBudget; }
     public double getParticleDistanceCullSq() { return particleDistanceCullSq; }
+    public boolean isAnimationLodEnabled() { return animationLodEnabled; }
+    public boolean isTextureCullingEnabled() { return textureCullingEnabled; }
+    public boolean isTickBurstProtectionEnabled() { return tickBurstProtectionEnabled; }
+    public boolean isGcGuardEnabled() { return gcGuardEnabled; }
     public int getMonitorWindowSize() { return monitorWindowSize; }
     public boolean isDiagnosticsEnabled() { return diagnosticsEnabled; }
     public double getAdaptiveHysteresisLow() { return adaptiveHysteresisLow; }
@@ -170,13 +187,6 @@ public class LiltConfig {
         save();
     }
 
-    public void setTargetFps(int fps) {
-        this.targetFps = fps;
-        this.activeProfile = "custom";
-        validate();
-        save();
-    }
-
     public void setParticleBudget(int budget) {
         this.particleBudget = budget;
         this.activeProfile = "custom";
@@ -193,6 +203,30 @@ public class LiltConfig {
 
     public void setParticleOptimizationEnabled(boolean enabled) {
         this.particleOptimizationEnabled = enabled;
+        save();
+    }
+
+    public void setAnimationLodEnabled(boolean enabled) {
+        this.animationLodEnabled = enabled;
+        this.activeProfile = "custom";
+        save();
+    }
+
+    public void setTextureCullingEnabled(boolean enabled) {
+        this.textureCullingEnabled = enabled;
+        this.activeProfile = "custom";
+        save();
+    }
+
+    public void setTickBurstProtectionEnabled(boolean enabled) {
+        this.tickBurstProtectionEnabled = enabled;
+        this.activeProfile = "custom";
+        save();
+    }
+
+    public void setGcGuardEnabled(boolean enabled) {
+        this.gcGuardEnabled = enabled;
+        this.activeProfile = "custom";
         save();
     }
 }

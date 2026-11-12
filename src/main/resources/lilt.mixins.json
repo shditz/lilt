@@ -5,8 +5,11 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [],
   "client": [
+    "IntegratedServerMixin",
+    "LivingEntityRendererMixin",
     "MinecraftMixin",
     "ParticleEngineMixin",
+    "TextureAtlasMixin",
     "VideoSettingsScreenMixin"
   ],
   "injectors": {

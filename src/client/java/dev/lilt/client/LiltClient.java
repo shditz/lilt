@@ -32,6 +32,11 @@ public class LiltClient implements ClientModInitializer {
     public void onInitializeClient() {
         LiltMod.LOGGER.info("Lilt client initialization starting");
 
+        try {
+            Thread.currentThread().setPriority(8);
+        } catch (SecurityException ignored) {
+        }
+
         config = LiltConfig.load();
         LiltMod.LOGGER.info("Configuration loaded: profile={}", config.getActiveProfile());
 

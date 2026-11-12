@@ -25,10 +25,10 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
             .addPage(builder.createOptionPage()
                 .setName(Component.literal("Lilt"))
                 .addOptionGroup(builder.createOptionGroup()
-                    .setName(Component.literal("Adaptive Pacing"))
+                    .setName(Component.literal("Adaptive Pacing & Tuning"))
                     .addOption(builder.createBooleanOption(Identifier.fromNamespaceAndPath("lilt", "adaptive"))
-                        .setName(Component.literal("Adaptive Tuning"))
-                        .setTooltip(Component.literal("Dynamically reduces particle workload during severe frametime drops to maintain smooth frame pacing."))
+                        .setName(Component.literal("Adaptive Workload Tuning"))
+                        .setTooltip(Component.literal("Dynamically scales particle workload during severe frametime drops to preserve smooth frame pacing."))
                         .setDefaultValue(config.isAdaptiveEnabled())
                         .setStorageHandler(storage)
                         .setBinding(val -> {
@@ -36,21 +36,29 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                             LiltClient.onConfigUpdated();
                         }, config::isAdaptiveEnabled)
                     )
-                    .addOption(builder.createIntegerOption(Identifier.fromNamespaceAndPath("lilt", "target_fps"))
-                        .setName(Component.literal("Target Framerate"))
-                        .setTooltip(Component.literal("Framerate threshold used by Adaptive Tuning to detect performance drops."))
-                        .setRange(30, 240, 10)
-                        .setValueFormatter(v -> Component.literal(v + " FPS"))
-                        .setDefaultValue(config.getTargetFps())
-                        .setStorageHandler(storage)
-                        .setBinding(val -> {
-                            config.setTargetFps(val);
-                            LiltClient.onConfigUpdated();
-                        }, config::getTargetFps)
-                    )
                 )
                 .addOptionGroup(builder.createOptionGroup()
-                    .setName(Component.literal("Particle Optimizer"))
+                    .setName(Component.literal("Rendering & Animation Optimizations"))
+                    .addOption(builder.createBooleanOption(Identifier.fromNamespaceAndPath("lilt", "animation_lod"))
+                        .setName(Component.literal("Entity Animation LOD"))
+                        .setTooltip(Component.literal("Throttles distant entity model animations based on camera distance to eliminate massive FPS drops in villages and mob farms."))
+                        .setDefaultValue(config.isAnimationLodEnabled())
+                        .setStorageHandler(storage)
+                        .setBinding(val -> {
+                            config.setAnimationLodEnabled(val);
+                            LiltClient.onConfigUpdated();
+                        }, config::isAnimationLodEnabled)
+                    )
+                    .addOption(builder.createBooleanOption(Identifier.fromNamespaceAndPath("lilt", "texture_culling"))
+                        .setName(Component.literal("Texture Animation Optimization"))
+                        .setTooltip(Component.literal("Throttles animated texture buffer uploads across PCIe bus during frametime spikes and while menus are active."))
+                        .setDefaultValue(config.isTextureCullingEnabled())
+                        .setStorageHandler(storage)
+                        .setBinding(val -> {
+                            config.setTextureCullingEnabled(val);
+                            LiltClient.onConfigUpdated();
+                        }, config::isTextureCullingEnabled)
+                    )
                     .addOption(builder.createBooleanOption(Identifier.fromNamespaceAndPath("lilt", "particle_culling"))
                         .setName(Component.literal("Particle Culling"))
                         .setTooltip(Component.literal("Skips rendering of distant particles outside culling radius. Near-camera particles are always preserved."))
@@ -87,7 +95,27 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                     )
                 )
                 .addOptionGroup(builder.createOptionGroup()
-                    .setName(Component.literal("Diagnostics & HUD"))
+                    .setName(Component.literal("Engine & Memory Stability"))
+                    .addOption(builder.createBooleanOption(Identifier.fromNamespaceAndPath("lilt", "tick_burst_protection"))
+                        .setName(Component.literal("Tick Burst Limiter"))
+                        .setTooltip(Component.literal("Prevents singleplayer internal server tick catch-up bursts during chunk loading from starving the client render thread."))
+                        .setDefaultValue(config.isTickBurstProtectionEnabled())
+                        .setStorageHandler(storage)
+                        .setBinding(val -> {
+                            config.setTickBurstProtectionEnabled(val);
+                            LiltClient.onConfigUpdated();
+                        }, config::isTickBurstProtectionEnabled)
+                    )
+                    .addOption(builder.createBooleanOption(Identifier.fromNamespaceAndPath("lilt", "gc_guard"))
+                        .setName(Component.literal("Proactive Memory Guard"))
+                        .setTooltip(Component.literal("Proactively evacuates Java heap when paused if memory pressure is high, preventing in-game Major GC freezes."))
+                        .setDefaultValue(config.isGcGuardEnabled())
+                        .setStorageHandler(storage)
+                        .setBinding(val -> {
+                            config.setGcGuardEnabled(val);
+                            LiltClient.onConfigUpdated();
+                        }, config::isGcGuardEnabled)
+                    )
                     .addOption(builder.createBooleanOption(Identifier.fromNamespaceAndPath("lilt", "hud_overlay"))
                         .setName(Component.literal("HUD Overlay (F7)"))
                         .setTooltip(Component.literal("Displays live performance telemetry: FPS, frame pacing, tick times, GC pauses, and bottlenecks."))

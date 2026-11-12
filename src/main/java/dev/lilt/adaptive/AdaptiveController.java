@@ -36,12 +36,25 @@ public class AdaptiveController {
         return userFramerateCap;
     }
 
-    public int getEffectiveTargetFps() {
-        int target = config.getTargetFps();
-        if (userFramerateCap > 0 && userFramerateCap < 260) {
-            target = Math.min(target, userFramerateCap);
-        }
-        return target;
+    public double getSpikeRatio() {
+        double p50 = monitor.getP50FrameTimeMs();
+        if (p50 <= 0.0) return 1.0;
+        double p99 = monitor.getP99FrameTimeMs();
+        return p99 / p50;
+    }
+
+    public double getInstantaneousSpikeRatio() {
+        double p50 = monitor.getP50FrameTimeMs();
+        if (p50 <= 0.0) return 1.0;
+        return monitor.getFrameTimeMs() / p50;
+    }
+
+    public boolean isFrametimeSpiking() {
+        return getSpikeRatio() > 1.8 || getInstantaneousSpikeRatio() > 2.2;
+    }
+
+    public boolean isSevereSpike() {
+        return getSpikeRatio() > 2.5 || getInstantaneousSpikeRatio() > 3.5;
     }
 
     public void tick() {
@@ -52,12 +65,10 @@ public class AdaptiveController {
 
         if (monitor.getFrameCount() < 60) return;
 
-        int effectiveTarget = getEffectiveTargetFps();
-        double fpsRatio = monitor.getFpsRatio(effectiveTarget);
-        double hysteresisLow = config.getAdaptiveHysteresisLow();
-        double hysteresisHigh = config.getAdaptiveHysteresisHigh();
+        double spikeRatio = getSpikeRatio();
+        double instRatio = getInstantaneousSpikeRatio();
 
-        if (fpsRatio < hysteresisLow) {
+        if (spikeRatio > 1.8 || instRatio > 2.2) {
             if (!isParticleReductionRelevant()) {
                 state = AdaptiveState.STABLE;
                 lastAction = "Suppressed reduction: " + diagnostics.getCurrentPressure().getDisplayName();
@@ -68,7 +79,7 @@ public class AdaptiveController {
             state = AdaptiveState.REDUCING;
             applyReduction();
             cooldownTicks = config.getAdaptiveCooldownTicks();
-        } else if (fpsRatio > hysteresisHigh) {
+        } else if (spikeRatio <= 1.35 && instRatio <= 1.5) {
             int currentBudget = particleOptimizer.getEffectiveBudget();
             int configBudget = config.getParticleBudget();
 
