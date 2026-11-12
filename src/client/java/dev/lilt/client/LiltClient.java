@@ -60,15 +60,11 @@ public class LiltClient implements ClientModInitializer {
             if (client.player != null && !inGameInitialized) {
                 inGameInitialized = true;
                 try {
-                    com.mojang.renderpearl.api.device.GpuDevice device = com.mojang.blaze3d.systems.RenderSystem.tryGetDevice();
-                    if (device != null) {
-                        com.mojang.renderpearl.api.device.DeviceInfo info = device.getDeviceInfo();
-                        if (info != null) {
-                            hardwareInfo.setGpuInfo(info.vendorName(), info.name(), info.backendName());
-                        }
-                    }
+                    String vendor = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_VENDOR);
+                    String renderer = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER);
+                    hardwareInfo.setGpuInfo(vendor, renderer, "OpenGL");
                 } catch (Throwable t) {
-                    LiltMod.LOGGER.warn("Could not query GPU info via RenderPearl: {}", t.getMessage());
+                    LiltMod.LOGGER.warn("Could not query GPU info: {}", t.getMessage());
                 }
                 LiltMod.LOGGER.info("Lilt active. GPU: {} (Backend: {})",
                     hardwareInfo.getGpuRenderer(), hardwareInfo.getGraphicsBackend());
