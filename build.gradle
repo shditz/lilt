@@ -35,7 +35,7 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-    compileOnly "net.caffeinemc:sodium-fabric:0.9.2+mc26.2"
+    compileOnly "net.caffeinemc:sodium-fabric:0.9.2+mc26.1.2"
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
