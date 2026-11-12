@@ -9,7 +9,6 @@ import dev.lilt.hardware.HardwareInfo;
 import dev.lilt.monitor.PerformanceMonitor;
 import dev.lilt.optimization.particle.ParticleOptimizer;
 import dev.lilt.ui.KeyBindings;
-import dev.lilt.ui.LiltConfigScreen;
 import dev.lilt.ui.OverlayRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;

@@ -17,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(VideoSettingsScreen.class)
+@SuppressWarnings("unused")
+@Mixin(value = VideoSettingsScreen.class, remap = false)
 public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
 
     protected VideoSettingsScreenMixin(Screen lastScreen, Options options, Component title) {

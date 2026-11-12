@@ -8,6 +8,7 @@ import net.caffeinemc.mods.sodium.api.config.structure.ConfigBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
+@SuppressWarnings("unused")
 public class SodiumConfigEntry implements ConfigEntryPoint {
 
     @Override
