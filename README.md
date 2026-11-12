@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Lilt Banner" width="100%">
+  <img src="https://raw.githubusercontent.com/shditz/lilt/main/assets/banner.png" alt="Lilt Banner" width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/icon.png" alt="Lilt Icon" width="96" height="96"><br>
+  <img src="https://raw.githubusercontent.com/shditz/lilt/main/assets/icon.png" alt="Lilt Icon" width="96" height="96"><br>
   <strong>A client-side frame stabilizer and workload optimizer for Minecraft Java Edition (Fabric 26.3).</strong>
 </p>
 
