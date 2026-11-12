@@ -33,14 +33,14 @@ Rather than replacing chunk rendering engines like Sodium, Lilt works alongside 
 
 Lilt does not modify rendering pipelines destructively and works out-of-the-box alongside popular optimization mods:
 
-| Mod | Compatibility | Role |
-|---|:---:|---|
-| **Sodium** | Supported | Chunk and terrain rendering |
-| **Lithium** | Supported | Server and physics logic |
-| **FerriteCore** | Supported | Memory and data structure optimization |
-| **EntityCulling** | Supported | Frustum and occlusion culling |
-| **ImmediatelyFast** | Supported | Immediate-mode UI and HUD batching |
-| **Iris Shaders** | Supported | Shader pack pipelines |
+| Mod                 | Compatibility | Role                                   |
+| ------------------- | :-----------: | -------------------------------------- |
+| **Sodium**          |   Supported   | Chunk and terrain rendering            |
+| **Lithium**         |   Supported   | Server and physics logic               |
+| **FerriteCore**     |   Supported   | Memory and data structure optimization |
+| **EntityCulling**   |   Supported   | Frustum and occlusion culling          |
+| **ImmediatelyFast** |   Supported   | Immediate-mode UI and HUD batching     |
+| **Iris Shaders**    |   Supported   | Shader pack pipelines                  |
 
 ---
 
@@ -73,6 +73,7 @@ git clone https://github.com/shditz/lilt.git
 cd lilt
 ./gradlew build
 ```
+
 The compiled JAR will be in `build/libs/`.
 
 ---
