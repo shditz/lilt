@@ -1,6 +1,15 @@
-# Lilt
+<p align="center">
+  <img src="assets/banner.png" alt="Lilt Banner" width="100%">
+</p>
 
-A client-side frame stabilizer and workload optimizer for Minecraft Java Edition (Fabric 26.3).
+<p align="center">
+  <img src="assets/icon.png" alt="Lilt Icon" width="96" height="96"><br>
+  <strong>A client-side frame stabilizer and workload optimizer for Minecraft Java Edition (Fabric 26.3).</strong>
+</p>
+
+---
+
+## Overview
 
 Lilt targets the real causes of sudden framerate drops and multi-second freezes on budget hardware, laptops, and heavily modded setups. Rather than replacing existing chunk rendering engines like Sodium, Lilt works alongside them to stabilize everything outside block rendering: mob animation computational overhead, singleplayer tick spirals, texture upload bus congestion, and memory garbage collection pauses.
 

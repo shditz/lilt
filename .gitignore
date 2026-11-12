@@ -25,6 +25,9 @@ desktop.ini
 !gradle/wrapper/gradle-wrapper.jar
 *.war
 
+# Agents & Internal Instructions
+AGENTS.md
+
 # Loom
 .fabric/
 remappedSrc/

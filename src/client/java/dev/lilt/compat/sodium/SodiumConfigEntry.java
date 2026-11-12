@@ -22,7 +22,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
 
         builder.registerOwnModOptions()
             .setName("Lilt")
-            .setVersion("0.1.0-dev.2")
+            .setVersion("1.0.0")
             .addPage(builder.createOptionPage()
                 .setName(Component.literal("Lilt"))
                 .addOptionGroup(builder.createOptionGroup()
