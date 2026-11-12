@@ -4,11 +4,11 @@
   "version": "${version}",
   "name": "Lilt",
   "description": "Client-side performance monitor and workload stabilizer. Keeps framerates steady during intense scenes by managing particle strain, tracking frame intervals, and diagnosing bottlenecks.",
-  "authors": ["Lilt Contributors"],
+  "authors": ["shditz"],
   "contact": {
-    "homepage": "https://github.com/lilt-mc/lilt",
-    "sources": "https://github.com/lilt-mc/lilt",
-    "issues": "https://github.com/lilt-mc/lilt/issues"
+    "homepage": "https://github.com/shditz/lilt",
+    "sources": "https://github.com/shditz/lilt",
+    "issues": "https://github.com/shditz/lilt/issues"
   },
   "license": "MIT",
   "icon": "assets/lilt/icon.png",
