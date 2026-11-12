@@ -7,6 +7,9 @@ out/
 .idea/
 *.iml
 .vscode/
+.settings/
+.project
+.classpath
 *.swp
 *~
 
