@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.core.particles.ParticleOptions;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,11 +20,11 @@ import java.util.Map;
 import java.util.Queue;
 
 @SuppressWarnings("unused")
-@Mixin(value = ParticleEngine.class, remap = false)
+@Mixin(ParticleEngine.class)
 public abstract class ParticleEngineMixin {
 
     @Shadow
-    private Map<ParticleRenderType, ParticleGroup<?>> particles;
+    private Map<ParticleRenderType, Queue<Particle>> particles;
 
     @Shadow
     private Queue<Particle> particlesToAdd;
@@ -34,9 +33,9 @@ public abstract class ParticleEngineMixin {
     private int lilt$calculateActiveParticles() {
         int count = 0;
         if (this.particles != null) {
-            for (ParticleGroup<?> group : this.particles.values()) {
-                if (group != null) {
-                    count += group.size();
+            for (Queue<Particle> queue : this.particles.values()) {
+                if (queue != null) {
+                    count += queue.size();
                 }
             }
         }

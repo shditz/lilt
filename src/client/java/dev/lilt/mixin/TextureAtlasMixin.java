@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @SuppressWarnings("unused")
-@Mixin(value = TextureAtlas.class, remap = false)
+@Mixin(TextureAtlas.class)
 public abstract class TextureAtlasMixin {
 
     @Unique

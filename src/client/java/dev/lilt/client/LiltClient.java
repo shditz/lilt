@@ -12,8 +12,8 @@ import dev.lilt.ui.KeyBindings;
 import dev.lilt.ui.OverlayRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.resources.Identifier;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import org.lwjgl.opengl.GL11;
 
 public class LiltClient implements ClientModInitializer {
 
@@ -53,22 +53,20 @@ public class LiltClient implements ClientModInitializer {
         adaptiveController = new AdaptiveController(config, monitor, diagnostics, particleOptimizer);
         overlayRenderer = new OverlayRenderer(config, monitor, diagnostics, hardwareInfo);
 
-        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("lilt", "performance_overlay"), overlayRenderer);
+        HudRenderCallback.EVENT.register(overlayRenderer::render);
         KeyBindings.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null && !inGameInitialized) {
                 inGameInitialized = true;
                 try {
-                    com.mojang.renderpearl.api.device.GpuDevice device = com.mojang.blaze3d.systems.RenderSystem.tryGetDevice();
-                    if (device != null) {
-                        com.mojang.renderpearl.api.device.DeviceInfo info = device.getDeviceInfo();
-                        if (info != null) {
-                            hardwareInfo.setGpuInfo(info.vendorName(), info.name(), info.backendName());
-                        }
+                    String vendor = GL11.glGetString(GL11.GL_VENDOR);
+                    String renderer = GL11.glGetString(GL11.GL_RENDERER);
+                    if (vendor != null && renderer != null) {
+                        hardwareInfo.setGpuInfo(vendor, renderer, "OpenGL");
                     }
                 } catch (Throwable t) {
-                    LiltMod.LOGGER.warn("Could not query GPU info via RenderPearl: {}", t.getMessage());
+                    LiltMod.LOGGER.warn("Could not query GPU info via GL11: {}", t.getMessage());
                 }
                 LiltMod.LOGGER.info("Lilt active. GPU: {} (Backend: {})",
                     hardwareInfo.getGpuRenderer(), hardwareInfo.getGraphicsBackend());

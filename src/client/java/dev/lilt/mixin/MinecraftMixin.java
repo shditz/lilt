@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @SuppressWarnings("unused")
-@Mixin(value = Minecraft.class, remap = false)
+@Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
 
     @Unique
@@ -24,8 +24,8 @@ public abstract class MinecraftMixin {
     @Unique
     private static long lilt$lastClientTickStartNanos = 0;
 
-    @Inject(method = "renderFrame", at = @At("HEAD"))
-    private void lilt$onRenderFrame(boolean renderLevel, CallbackInfo ci) {
+    @Inject(method = "runTick", at = @At("HEAD"))
+    private void lilt$onRunTick(boolean renderLevel, CallbackInfo ci) {
         long now = System.nanoTime();
         if (lilt$lastRenderFrameNanos > 0 && LiltClient.getMonitor() != null) {
             LiltClient.getMonitor().recordFrame(now - lilt$lastRenderFrameNanos);
@@ -51,7 +51,7 @@ public abstract class MinecraftMixin {
         }
     }
 
-    @Inject(method = "setScreenAndShow", at = @At("HEAD"))
+    @Inject(method = "setScreen", at = @At("HEAD"))
     private void lilt$onSetScreen(Screen screen, CallbackInfo ci) {
         if (screen instanceof PauseScreen) {
             GcGuard.tryProactiveGc();
