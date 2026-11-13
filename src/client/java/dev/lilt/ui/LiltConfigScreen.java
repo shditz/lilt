@@ -38,9 +38,10 @@ public class LiltConfigScreen extends Screen {
             currentProfile = "balanced";
         }
 
-        CycleButton<String> profileBtn = CycleButton.<String>builder(
-            val -> Component.literal(val.substring(0, 1).toUpperCase() + val.substring(1))
-        ).withValues(PROFILES).withInitialValue(currentProfile).create(
+        CycleButton<String> profileBtn = CycleButton.builder(
+            val -> Component.literal(val.substring(0, 1).toUpperCase() + val.substring(1)),
+            currentProfile
+        ).withValues(PROFILES).create(
             leftX, 40, buttonWidth, buttonHeight,
             Component.literal("Profile"),
             (btn, val) -> {
@@ -134,9 +135,10 @@ public class LiltConfigScreen extends Screen {
 
         int currentBudget = config.getParticleBudget();
         int budgetVal = PARTICLE_BUDGET_OPTIONS.contains(currentBudget) ? currentBudget : 1000;
-        CycleButton<Integer> budgetBtn = CycleButton.<Integer>builder(
-            val -> Component.literal(String.valueOf(val))
-        ).withValues(PARTICLE_BUDGET_OPTIONS).withInitialValue(budgetVal).create(
+        CycleButton<Integer> budgetBtn = CycleButton.builder(
+            val -> Component.literal(String.valueOf(val)),
+            budgetVal
+        ).withValues(PARTICLE_BUDGET_OPTIONS).create(
             rightX, 112, buttonWidth, buttonHeight,
             Component.literal("Particle Budget"),
             (btn, val) -> {
@@ -152,9 +154,10 @@ public class LiltConfigScreen extends Screen {
 
         int currentDist = (int) Math.round(Math.sqrt(config.getParticleDistanceCullSq()));
         int distVal = CULL_DISTANCE_OPTIONS.contains(currentDist) ? currentDist : 32;
-        CycleButton<Integer> distBtn = CycleButton.<Integer>builder(
-            val -> Component.literal(val + " blocks")
-        ).withValues(CULL_DISTANCE_OPTIONS).withInitialValue(distVal).create(
+        CycleButton<Integer> distBtn = CycleButton.builder(
+            val -> Component.literal(val + " blocks"),
+            distVal
+        ).withValues(CULL_DISTANCE_OPTIONS).create(
             leftX, 136, buttonWidth, buttonHeight,
             Component.literal("Cull Distance"),
             (btn, val) -> {
@@ -197,9 +200,9 @@ public class LiltConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 0xFFFFFF);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 0xFFFFFF);
     }
 
     @Override

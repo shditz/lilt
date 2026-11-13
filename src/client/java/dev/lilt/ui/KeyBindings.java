@@ -13,7 +13,7 @@ public class KeyBindings {
         toggleOverlay = KeyBindingHelper.registerKeyBinding(new KeyMapping(
             "key.lilt.toggle_overlay",
             InputConstants.KEY_F7,
-            "key.categories.misc"
+            KeyMapping.Category.MISC
         ));
     }
 

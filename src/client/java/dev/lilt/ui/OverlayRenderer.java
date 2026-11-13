@@ -4,12 +4,13 @@ import dev.lilt.config.LiltConfig;
 import dev.lilt.diagnostics.PerformanceDiagnostics;
 import dev.lilt.hardware.HardwareInfo;
 import dev.lilt.monitor.PerformanceMonitor;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
-public class OverlayRenderer {
+public class OverlayRenderer implements HudElement {
 
     private final LiltConfig config;
     private final PerformanceMonitor monitor;
@@ -61,56 +62,41 @@ public class OverlayRenderer {
         this.visible = config.isOverlayEnabled();
     }
 
-    private void refreshCache(long now) {
-        lastCacheUpdateMs = now;
+    private void refreshCache(long nowMs) {
+        lastCacheUpdateMs = nowMs;
 
         cachedProfileTag = "[" + config.getActiveProfile().toUpperCase() + "]";
 
-        int fps = (int) Math.round(monitor.getCurrentFps());
-        double p1Low = monitor.getOnePercentLowFps();
-        cachedFpsLine = String.format("FPS: %d  (1%% low: %.1f)", fps, p1Low);
-        if (fps >= 60) {
-            cachedFpsColor = COLOR_GOOD;
-        } else if (fps >= 30) {
-            cachedFpsColor = COLOR_WARN;
-        } else {
-            cachedFpsColor = COLOR_ALERT;
-        }
+        double fps = monitor.getCurrentFps();
+        double avgFps = monitor.getAverageFps();
+        double low1Pct = monitor.getOnePercentLowFps();
+        cachedFpsColor = fps >= 55 ? COLOR_GOOD : fps >= 30 ? COLOR_WARN : COLOR_ALERT;
+        cachedFpsLine = String.format("FPS: %.0f  |  Avg: %.0f  |  1%%: %.0f", fps, avgFps, low1Pct);
 
+        double frameMs = monitor.getFrameTimeMs();
         double p50 = monitor.getP50FrameTimeMs();
-        double p95 = monitor.getP95FrameTimeMs();
         double p99 = monitor.getP99FrameTimeMs();
-        cachedFrameLine = String.format("Frame: p50 %.1f  p95 %.1f  p99 %.1f ms", p50, p95, p99);
+        cachedFrameLine = String.format("Frame: %.1fms (P50: %.1f, P99: %.1f)", frameMs, p50, p99);
 
-        double tickMs = monitor.getLastTickTimeMs();
-        cachedTickLine = String.format("Tick: %.1f ms (50.0 cap)", tickMs);
-        if (tickMs <= 35.0) {
-            cachedTickColor = COLOR_GOOD;
-        } else if (tickMs <= 50.0) {
-            cachedTickColor = COLOR_WARN;
+        double clientTickMs = monitor.getClientTickDurationMs();
+        cachedTickColor = clientTickMs < 45.0 ? COLOR_GOOD : COLOR_ALERT;
+        if (monitor.isIntegratedServerRunning()) {
+            cachedTickLine = String.format("Tick: C %.1fms  |  S %.1fms", clientTickMs, monitor.getIntegratedServerTickMs());
         } else {
-            cachedTickColor = COLOR_ALERT;
+            cachedTickLine = String.format("Tick: C %.1fms (Remote Server)", clientTickMs);
         }
 
-        long usedMb = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024L * 1024L);
+        long usedMb = hardwareInfo.getUsedHeapMb();
         long maxMb = hardwareInfo.getMaxHeapMb();
-        double heapPct = maxMb > 0 ? (double) usedMb / maxMb * 100.0 : 0.0;
-        cachedMemoryLine = String.format("Heap: %d / %d MB (%.0f%%)", usedMb, maxMb, heapPct);
-        if (heapPct < 75.0) {
-            cachedMemoryColor = COLOR_GOOD;
-        } else if (heapPct < 88.0) {
-            cachedMemoryColor = COLOR_WARN;
-        } else {
-            cachedMemoryColor = COLOR_ALERT;
-        }
+        double memRatio = maxMb > 0 ? (double) usedMb / maxMb : 0;
+        cachedMemoryColor = memRatio < 0.75 ? COLOR_GOOD : memRatio < 0.88 ? COLOR_WARN : COLOR_ALERT;
+        cachedMemoryLine = String.format("Memory: %d / %d MB (%.0f%%)", usedMb, maxMb, memRatio * 100);
 
-        long gcCount = monitor.getGcCountDelta();
-        long gcTimeMs = monitor.getGcTimeDeltaMs();
-        cachedGcLine = String.format("GC: %d pauses (%d ms total)", gcCount, gcTimeMs);
+        cachedGcLine = String.format("GC: %d pauses (+%dms)", monitor.getGcCountDelta(), monitor.getGcTimeDeltaMs());
 
         String renderer = hardwareInfo.getGpuRenderer();
-        if (renderer == null || renderer.isBlank()) renderer = "detecting...";
-        if (renderer.length() > 28) renderer = renderer.substring(0, 26) + "..";
+        if (renderer == null || renderer.isBlank()) renderer = "unavailable";
+        if (renderer.length() > 28) renderer = renderer.substring(0, 25) + "...";
         cachedGpuLine = "GPU: " + renderer;
 
         String backend = hardwareInfo.getGraphicsBackend();
@@ -129,6 +115,7 @@ public class OverlayRenderer {
         cachedAdaptiveColor = config.isAdaptiveEnabled() ? COLOR_GOOD : COLOR_TEXT_MUTED;
     }
 
+    @Override
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         if (!visible) return;
 
