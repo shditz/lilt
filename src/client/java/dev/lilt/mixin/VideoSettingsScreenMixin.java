@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @SuppressWarnings("unused")
-@Mixin(value = VideoSettingsScreen.class, remap = false)
+@Mixin(VideoSettingsScreen.class)
 public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
 
     protected VideoSettingsScreenMixin(Screen lastScreen, Options options, Component title) {
@@ -31,8 +31,6 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         if (config == null) {
             return;
         }
-
-        this.list.addHeader(Component.literal("Lilt"));
 
         List<String> profiles = List.of("balanced", "low", "performance", "custom");
         String currentProfile = config.getActiveProfile().toLowerCase();
@@ -57,10 +55,9 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         @SuppressWarnings("unchecked")
         final CycleButton<Integer>[] distHolder = (CycleButton<Integer>[]) new CycleButton<?>[1];
 
-        CycleButton<String> profileBtn = CycleButton.builder(
-            val -> Component.literal(val.substring(0, 1).toUpperCase() + val.substring(1)),
-            currentProfile
-        ).withValues(profiles).create(
+        CycleButton<String> profileBtn = CycleButton.<String>builder(
+            val -> Component.literal(val.substring(0, 1).toUpperCase() + val.substring(1))
+        ).withValues(profiles).withInitialValue(currentProfile).create(
             Component.literal("Lilt Profile"),
             (btn, val) -> {
                 config.setActiveProfile(val);
@@ -172,10 +169,9 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         List<Integer> budgetOptions = List.of(100, 300, 500, 1000, 1500, 2500);
         int currentBudget = config.getParticleBudget();
         int budget = budgetOptions.contains(currentBudget) ? currentBudget : 1000;
-        CycleButton<Integer> budgetBtn = CycleButton.builder(
-            val -> Component.literal(String.valueOf(val)),
-            budget
-        ).withValues(budgetOptions).create(
+        CycleButton<Integer> budgetBtn = CycleButton.<Integer>builder(
+            val -> Component.literal(String.valueOf(val))
+        ).withValues(budgetOptions).withInitialValue(budget).create(
             Component.literal("Particle Budget"),
             (btn, val) -> {
                 config.setParticleBudget(val);
@@ -194,10 +190,9 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         List<Integer> distOptions = List.of(16, 20, 32, 48, 64);
         int currentDist = (int) Math.round(Math.sqrt(config.getParticleDistanceCullSq()));
         int dist = distOptions.contains(currentDist) ? currentDist : 32;
-        CycleButton<Integer> distBtn = CycleButton.builder(
-            val -> Component.literal(val + " blocks"),
-            dist
-        ).withValues(distOptions).create(
+        CycleButton<Integer> distBtn = CycleButton.<Integer>builder(
+            val -> Component.literal(val + " blocks")
+        ).withValues(distOptions).withInitialValue(dist).create(
             Component.literal("Cull Distance"),
             (btn, val) -> {
                 config.setParticleDistanceCullSq(val * val);

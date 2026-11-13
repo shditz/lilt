@@ -12,8 +12,7 @@ import dev.lilt.ui.KeyBindings;
 import dev.lilt.ui.OverlayRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.resources.Identifier;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 public class LiltClient implements ClientModInitializer {
 
@@ -53,7 +52,7 @@ public class LiltClient implements ClientModInitializer {
         adaptiveController = new AdaptiveController(config, monitor, diagnostics, particleOptimizer);
         overlayRenderer = new OverlayRenderer(config, monitor, diagnostics, hardwareInfo);
 
-        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("lilt", "performance_overlay"), overlayRenderer);
+        HudRenderCallback.EVENT.register(overlayRenderer::render);
         KeyBindings.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

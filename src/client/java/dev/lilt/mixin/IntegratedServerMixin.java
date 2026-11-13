@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.BooleanSupplier;
 
-@Mixin(value = IntegratedServer.class, remap = false)
+@Mixin(IntegratedServer.class)
 public abstract class IntegratedServerMixin {
 
     @Unique

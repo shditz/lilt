@@ -4,13 +4,12 @@ import dev.lilt.config.LiltConfig;
 import dev.lilt.diagnostics.PerformanceDiagnostics;
 import dev.lilt.hardware.HardwareInfo;
 import dev.lilt.monitor.PerformanceMonitor;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
-public class OverlayRenderer implements HudElement {
+public class OverlayRenderer {
 
     private final LiltConfig config;
     private final PerformanceMonitor monitor;
@@ -62,41 +61,56 @@ public class OverlayRenderer implements HudElement {
         this.visible = config.isOverlayEnabled();
     }
 
-    private void refreshCache(long nowMs) {
-        lastCacheUpdateMs = nowMs;
+    private void refreshCache(long now) {
+        lastCacheUpdateMs = now;
 
         cachedProfileTag = "[" + config.getActiveProfile().toUpperCase() + "]";
 
-        double fps = monitor.getCurrentFps();
-        double avgFps = monitor.getAverageFps();
-        double low1Pct = monitor.getOnePercentLowFps();
-        cachedFpsColor = fps >= 55 ? COLOR_GOOD : fps >= 30 ? COLOR_WARN : COLOR_ALERT;
-        cachedFpsLine = String.format("FPS: %.0f  |  Avg: %.0f  |  1%%: %.0f", fps, avgFps, low1Pct);
-
-        double frameMs = monitor.getFrameTimeMs();
-        double p50 = monitor.getP50FrameTimeMs();
-        double p99 = monitor.getP99FrameTimeMs();
-        cachedFrameLine = String.format("Frame: %.1fms (P50: %.1f, P99: %.1f)", frameMs, p50, p99);
-
-        double clientTickMs = monitor.getClientTickDurationMs();
-        cachedTickColor = clientTickMs < 45.0 ? COLOR_GOOD : COLOR_ALERT;
-        if (monitor.isIntegratedServerRunning()) {
-            cachedTickLine = String.format("Tick: C %.1fms  |  S %.1fms", clientTickMs, monitor.getIntegratedServerTickMs());
+        int fps = (int) Math.round(monitor.getCurrentFps());
+        double p1Low = monitor.getOnePercentLowFps();
+        cachedFpsLine = String.format("FPS: %d  (1%% low: %.1f)", fps, p1Low);
+        if (fps >= 60) {
+            cachedFpsColor = COLOR_GOOD;
+        } else if (fps >= 30) {
+            cachedFpsColor = COLOR_WARN;
         } else {
-            cachedTickLine = String.format("Tick: C %.1fms (Remote Server)", clientTickMs);
+            cachedFpsColor = COLOR_ALERT;
         }
 
-        long usedMb = hardwareInfo.getUsedHeapMb();
-        long maxMb = hardwareInfo.getMaxHeapMb();
-        double memRatio = maxMb > 0 ? (double) usedMb / maxMb : 0;
-        cachedMemoryColor = memRatio < 0.75 ? COLOR_GOOD : memRatio < 0.88 ? COLOR_WARN : COLOR_ALERT;
-        cachedMemoryLine = String.format("Memory: %d / %d MB (%.0f%%)", usedMb, maxMb, memRatio * 100);
+        double p50 = monitor.getP50FrameTimeMs();
+        double p95 = monitor.getP95FrameTimeMs();
+        double p99 = monitor.getP99FrameTimeMs();
+        cachedFrameLine = String.format("Frame: p50 %.1f  p95 %.1f  p99 %.1f ms", p50, p95, p99);
 
-        cachedGcLine = String.format("GC: %d pauses (+%dms)", monitor.getGcCountDelta(), monitor.getGcTimeDeltaMs());
+        double tickMs = monitor.getLastTickTimeMs();
+        cachedTickLine = String.format("Tick: %.1f ms (50.0 cap)", tickMs);
+        if (tickMs <= 35.0) {
+            cachedTickColor = COLOR_GOOD;
+        } else if (tickMs <= 50.0) {
+            cachedTickColor = COLOR_WARN;
+        } else {
+            cachedTickColor = COLOR_ALERT;
+        }
+
+        long usedMb = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024L * 1024L);
+        long maxMb = hardwareInfo.getMaxHeapMb();
+        double heapPct = maxMb > 0 ? (double) usedMb / maxMb * 100.0 : 0.0;
+        cachedMemoryLine = String.format("Heap: %d / %d MB (%.0f%%)", usedMb, maxMb, heapPct);
+        if (heapPct < 75.0) {
+            cachedMemoryColor = COLOR_GOOD;
+        } else if (heapPct < 88.0) {
+            cachedMemoryColor = COLOR_WARN;
+        } else {
+            cachedMemoryColor = COLOR_ALERT;
+        }
+
+        long gcCount = monitor.getGcCountDelta();
+        long gcTimeMs = monitor.getGcTimeDeltaMs();
+        cachedGcLine = String.format("GC: %d pauses (%d ms total)", gcCount, gcTimeMs);
 
         String renderer = hardwareInfo.getGpuRenderer();
-        if (renderer == null || renderer.isBlank()) renderer = "unavailable";
-        if (renderer.length() > 28) renderer = renderer.substring(0, 25) + "...";
+        if (renderer == null || renderer.isBlank()) renderer = "detecting...";
+        if (renderer.length() > 28) renderer = renderer.substring(0, 26) + "..";
         cachedGpuLine = "GPU: " + renderer;
 
         String backend = hardwareInfo.getGraphicsBackend();
@@ -115,8 +129,7 @@ public class OverlayRenderer implements HudElement {
         cachedAdaptiveColor = config.isAdaptiveEnabled() ? COLOR_GOOD : COLOR_TEXT_MUTED;
     }
 
-    @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         if (!visible) return;
 
         Minecraft client = Minecraft.getInstance();
@@ -129,41 +142,41 @@ public class OverlayRenderer implements HudElement {
         }
 
         graphics.fill(X, Y, X + WIDTH, Y + HEIGHT, COLOR_BG);
-        graphics.outline(X, Y, WIDTH, HEIGHT, COLOR_BORDER);
+        graphics.renderOutline(X, Y, WIDTH, HEIGHT, COLOR_BORDER);
         graphics.fill(X, Y, X + WIDTH, Y + 2, COLOR_HEADER);
 
         int textX = X + 6;
         int textY = Y + 6;
 
-        graphics.text(font, "Lilt", textX, textY, COLOR_HEADER);
-        graphics.text(font, cachedProfileTag, textX + WIDTH - font.width(cachedProfileTag) - 12, textY, COLOR_TEXT_MUTED);
+        graphics.drawString(font, "Lilt", textX, textY, COLOR_HEADER, false);
+        graphics.drawString(font, cachedProfileTag, textX + WIDTH - font.width(cachedProfileTag) - 12, textY, COLOR_TEXT_MUTED, false);
         textY += ROW_HEIGHT + 2;
 
-        graphics.text(font, cachedFpsLine, textX, textY, cachedFpsColor);
+        graphics.drawString(font, cachedFpsLine, textX, textY, cachedFpsColor, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedFrameLine, textX, textY, COLOR_TEXT_PRIMARY);
+        graphics.drawString(font, cachedFrameLine, textX, textY, COLOR_TEXT_PRIMARY, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedTickLine, textX, textY, cachedTickColor);
+        graphics.drawString(font, cachedTickLine, textX, textY, cachedTickColor, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedMemoryLine, textX, textY, cachedMemoryColor);
+        graphics.drawString(font, cachedMemoryLine, textX, textY, cachedMemoryColor, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedGcLine, textX, textY, COLOR_TEXT_MUTED);
+        graphics.drawString(font, cachedGcLine, textX, textY, COLOR_TEXT_MUTED, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedGpuLine, textX, textY, COLOR_TEXT_MUTED);
+        graphics.drawString(font, cachedGpuLine, textX, textY, COLOR_TEXT_MUTED, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedBackendLine, textX, textY, COLOR_TEXT_MUTED);
+        graphics.drawString(font, cachedBackendLine, textX, textY, COLOR_TEXT_MUTED, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedStateLine, textX, textY, cachedStateColor);
+        graphics.drawString(font, cachedStateLine, textX, textY, cachedStateColor, false);
         textY += ROW_HEIGHT;
 
-        graphics.text(font, cachedAdaptiveLine, textX, textY, cachedAdaptiveColor);
+        graphics.drawString(font, cachedAdaptiveLine, textX, textY, cachedAdaptiveColor, false);
     }
 
     public void toggle() {
