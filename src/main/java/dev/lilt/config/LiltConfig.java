@@ -12,16 +12,16 @@ import java.nio.file.Path;
 
 public class LiltConfig {
 
-    private static final int SCHEMA_VERSION = 2;
+    private static final int SCHEMA_VERSION = 3;
     private static final String CONFIG_FILE = "lilt.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private int schemaVersion = SCHEMA_VERSION;
-    private String activeProfile = "balanced";
+    private String activeProfile = "medium";
     private boolean overlayEnabled = false;
     private boolean adaptiveEnabled = true;
     private boolean particleOptimizationEnabled = true;
-    private int particleBudget = 1000;
+    private int particleBudget = 1500;
     private double particleDistanceCullSq = 1024.0;
     private boolean animationLodEnabled = true;
     private boolean textureCullingEnabled = true;
@@ -32,6 +32,9 @@ public class LiltConfig {
     private double adaptiveHysteresisLow = 0.85;
     private double adaptiveHysteresisHigh = 0.95;
     private int adaptiveCooldownTicks = 100;
+    private int soundLimit = 8;
+    private int shadowDistance = 24;
+    private boolean beaconCulling = true;
 
     private transient Path configPath;
 
@@ -83,7 +86,15 @@ public class LiltConfig {
 
     private static LiltConfig migrate(LiltConfig old) {
         LiltConfig migrated = new LiltConfig();
-        migrated.activeProfile = old.activeProfile;
+        String oldProfile = old.activeProfile != null ? old.activeProfile.toLowerCase() : "medium";
+        if (oldProfile.equals("balanced")) {
+            migrated.activeProfile = "medium";
+        } else if (oldProfile.equals("performance")) {
+            migrated.activeProfile = "high";
+        } else {
+            migrated.activeProfile = oldProfile;
+        }
+
         migrated.overlayEnabled = old.overlayEnabled;
         migrated.adaptiveEnabled = old.adaptiveEnabled;
         migrated.particleOptimizationEnabled = old.particleOptimizationEnabled;
@@ -93,17 +104,26 @@ public class LiltConfig {
         migrated.textureCullingEnabled = old.textureCullingEnabled;
         migrated.tickBurstProtectionEnabled = old.tickBurstProtectionEnabled;
         migrated.gcGuardEnabled = old.gcGuardEnabled;
+        migrated.soundLimit = old.soundLimit;
+        migrated.shadowDistance = old.shadowDistance;
+        migrated.beaconCulling = old.beaconCulling;
         return migrated;
     }
 
     private void validate() {
         if (activeProfile == null || activeProfile.isBlank()) {
-            activeProfile = "balanced";
+            activeProfile = "medium";
         }
         String lower = activeProfile.toLowerCase();
-        if (!lower.equals("low") && !lower.equals("balanced") && !lower.equals("performance") && !lower.equals("custom")) {
-            LiltMod.LOGGER.warn("Unknown profile '{}', falling back to balanced", activeProfile);
-            activeProfile = "balanced";
+        if (lower.equals("balanced")) {
+            lower = "medium";
+        } else if (lower.equals("performance")) {
+            lower = "high";
+        }
+
+        if (!lower.equals("low") && !lower.equals("medium") && !lower.equals("high") && !lower.equals("server") && !lower.equals("custom")) {
+            LiltMod.LOGGER.warn("Unknown profile '{}', falling back to medium", activeProfile);
+            lower = "medium";
         }
         activeProfile = lower;
 
@@ -113,33 +133,60 @@ public class LiltConfig {
         adaptiveHysteresisLow = Math.max(0.5, Math.min(adaptiveHysteresisLow, 0.99));
         adaptiveHysteresisHigh = Math.max(adaptiveHysteresisLow + 0.01, Math.min(adaptiveHysteresisHigh, 1.0));
         adaptiveCooldownTicks = Math.max(20, Math.min(adaptiveCooldownTicks, 600));
+
+        if (soundLimit != 0 && soundLimit != 2 && soundLimit != 4 && soundLimit != 8) {
+            soundLimit = 8;
+        }
+        if (shadowDistance != -1 && shadowDistance != 0 && shadowDistance != 16 && shadowDistance != 24 && shadowDistance != 32) {
+            shadowDistance = 24;
+        }
     }
 
     private void applyProfile() {
         switch (activeProfile) {
             case "low" -> {
-                particleBudget = 300;
+                particleBudget = 500;
                 particleDistanceCullSq = 400.0;
                 animationLodEnabled = true;
                 textureCullingEnabled = true;
                 tickBurstProtectionEnabled = true;
                 gcGuardEnabled = true;
+                beaconCulling = true;
+                shadowDistance = 0;
+                soundLimit = 2;
             }
-            case "balanced" -> {
-                particleBudget = 1000;
+            case "medium" -> {
+                particleBudget = 1500;
                 particleDistanceCullSq = 1024.0;
                 animationLodEnabled = true;
                 textureCullingEnabled = true;
                 tickBurstProtectionEnabled = true;
                 gcGuardEnabled = true;
+                beaconCulling = true;
+                shadowDistance = 24;
+                soundLimit = 8;
             }
-            case "performance" -> {
-                particleBudget = 2500;
+            case "high" -> {
+                particleBudget = 3000;
                 particleDistanceCullSq = 4096.0;
                 animationLodEnabled = true;
                 textureCullingEnabled = true;
-                tickBurstProtectionEnabled = true;
+                tickBurstProtectionEnabled = false;
+                gcGuardEnabled = false;
+                beaconCulling = false;
+                shadowDistance = -1;
+                soundLimit = 0;
+            }
+            case "server" -> {
+                particleBudget = 300;
+                particleDistanceCullSq = 576.0;
+                animationLodEnabled = true;
+                textureCullingEnabled = true;
+                tickBurstProtectionEnabled = false;
                 gcGuardEnabled = true;
+                beaconCulling = true;
+                shadowDistance = 16;
+                soundLimit = 4;
             }
         }
     }
@@ -169,6 +216,9 @@ public class LiltConfig {
     public double getAdaptiveHysteresisLow() { return adaptiveHysteresisLow; }
     public double getAdaptiveHysteresisHigh() { return adaptiveHysteresisHigh; }
     public int getAdaptiveCooldownTicks() { return adaptiveCooldownTicks; }
+    public int getSoundLimit() { return soundLimit; }
+    public int getShadowDistance() { return shadowDistance; }
+    public boolean isBeaconCulling() { return beaconCulling; }
 
     public void setActiveProfile(String profile) {
         this.activeProfile = profile;
@@ -226,6 +276,26 @@ public class LiltConfig {
 
     public void setGcGuardEnabled(boolean enabled) {
         this.gcGuardEnabled = enabled;
+        this.activeProfile = "custom";
+        save();
+    }
+
+    public void setSoundLimit(int limit) {
+        this.soundLimit = limit;
+        this.activeProfile = "custom";
+        validate();
+        save();
+    }
+
+    public void setShadowDistance(int distance) {
+        this.shadowDistance = distance;
+        this.activeProfile = "custom";
+        validate();
+        save();
+    }
+
+    public void setBeaconCulling(boolean enabled) {
+        this.beaconCulling = enabled;
         this.activeProfile = "custom";
         save();
     }
