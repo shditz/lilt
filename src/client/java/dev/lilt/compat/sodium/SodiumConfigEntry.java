@@ -22,7 +22,7 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
 
         builder.registerOwnModOptions()
             .setName("Lilt")
-            .setVersion("1.1.0")
+            .setVersion("1.2.0")
             .addPage(builder.createOptionPage()
                 .setName(Component.literal("Lilt"))
                 .addOptionGroup(builder.createOptionGroup()
@@ -49,6 +49,44 @@ public class SodiumConfigEntry implements ConfigEntryPoint {
                             config.setAnimationLodEnabled(val);
                             LiltClient.onConfigUpdated();
                         }, config::isAnimationLodEnabled)
+                    )
+                    .addOption(builder.createBooleanOption(ResourceLocation.fromNamespaceAndPath("lilt", "beacon_culling"))
+                        .setName(Component.literal("Beacon Beam Culling"))
+                        .setTooltip(Component.literal("Hides beacon and gateway beams when they are outside your view."))
+                        .setDefaultValue(config.isBeaconCulling())
+                        .setStorageHandler(storage)
+                        .setBinding(val -> {
+                            config.setBeaconCulling(val);
+                            LiltClient.onConfigUpdated();
+                        }, config::isBeaconCulling)
+                    )
+                    .addOption(builder.createIntegerOption(ResourceLocation.fromNamespaceAndPath("lilt", "shadow_distance"))
+                        .setName(Component.literal("Entity Shadow Distance"))
+                        .setTooltip(Component.literal("Skips rendering mob shadows that are far away or in complete darkness."))
+                        .setRange(-1, 32, 1)
+                        .setValueFormatter(v -> {
+                            if (v <= -1) return Component.literal("Default");
+                            if (v == 0) return Component.literal("Off");
+                            return Component.literal(v + " blocks");
+                        })
+                        .setDefaultValue(config.getShadowDistance())
+                        .setStorageHandler(storage)
+                        .setBinding(val -> {
+                            config.setShadowDistance(val);
+                            LiltClient.onConfigUpdated();
+                        }, config::getShadowDistance)
+                    )
+                    .addOption(builder.createIntegerOption(ResourceLocation.fromNamespaceAndPath("lilt", "sound_limit"))
+                        .setName(Component.literal("Sound Limiter"))
+                        .setTooltip(Component.literal("Prevents audio stutter by limiting repeated mob and piston sounds in crowded areas."))
+                        .setRange(0, 16, 2)
+                        .setValueFormatter(v -> v == 0 ? Component.literal("Unlimited") : Component.literal(v + " / sec"))
+                        .setDefaultValue(config.getSoundLimit())
+                        .setStorageHandler(storage)
+                        .setBinding(val -> {
+                            config.setSoundLimit(val);
+                            LiltClient.onConfigUpdated();
+                        }, config::getSoundLimit)
                     )
                     .addOption(builder.createBooleanOption(ResourceLocation.fromNamespaceAndPath("lilt", "texture_culling"))
                         .setName(Component.literal("Optimized Texture Updates"))

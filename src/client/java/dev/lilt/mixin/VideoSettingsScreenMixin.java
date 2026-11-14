@@ -32,16 +32,22 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             return;
         }
 
-        List<String> profiles = List.of("balanced", "low", "performance", "custom");
+        List<String> profiles = List.of("medium", "low", "high", "server", "custom");
         String currentProfile = config.getActiveProfile().toLowerCase();
         if (!profiles.contains(currentProfile)) {
-            currentProfile = "balanced";
+            currentProfile = "medium";
         }
 
         @SuppressWarnings("unchecked")
         final CycleButton<Boolean>[] adaptiveHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
         @SuppressWarnings("unchecked")
         final CycleButton<Boolean>[] animLodHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
+        @SuppressWarnings("unchecked")
+        final CycleButton<Boolean>[] beaconHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
+        @SuppressWarnings("unchecked")
+        final CycleButton<Integer>[] shadowDistHolder = (CycleButton<Integer>[]) new CycleButton<?>[1];
+        @SuppressWarnings("unchecked")
+        final CycleButton<Integer>[] soundLimitHolder = (CycleButton<Integer>[]) new CycleButton<?>[1];
         @SuppressWarnings("unchecked")
         final CycleButton<Boolean>[] texCullHolder = (CycleButton<Boolean>[]) new CycleButton<?>[1];
         @SuppressWarnings("unchecked")
@@ -64,6 +70,9 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
                 LiltClient.onConfigUpdated();
                 if (adaptiveHolder[0] != null) adaptiveHolder[0].setValue(config.isAdaptiveEnabled());
                 if (animLodHolder[0] != null) animLodHolder[0].setValue(config.isAnimationLodEnabled());
+                if (beaconHolder[0] != null) beaconHolder[0].setValue(config.isBeaconCulling());
+                if (shadowDistHolder[0] != null) shadowDistHolder[0].setValue(config.getShadowDistance());
+                if (soundLimitHolder[0] != null) soundLimitHolder[0].setValue(config.getSoundLimit());
                 if (texCullHolder[0] != null) texCullHolder[0].setValue(config.isTextureCullingEnabled());
                 if (tickGuardHolder[0] != null) tickGuardHolder[0].setValue(config.isTickBurstProtectionEnabled());
                 if (gcGuardHolder[0] != null) gcGuardHolder[0].setValue(config.isGcGuardEnabled());
@@ -73,8 +82,10 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         profileBtn.setTooltip(Tooltip.create(Component.literal(
-            "Balanced: Recommended baseline.\nLow: Maximum FPS for lower-end PCs.\nPerformance: High quality settings.\nCustom: Manual user adjustments."
+            "Medium: Balanced default.\nLow: Maximum FPS for lower-end hardware.\nHigh: Visual quality for powerful PCs.\nServer: Tailored for crowded multiplayer bases.\nCustom: Manual user adjustments."
         )));
+
+        this.list.addSmall(profileBtn, null);
 
         CycleButton<Boolean> adaptiveBtn = CycleButton.onOffBuilder(config.isAdaptiveEnabled()).create(
             Component.literal("Dynamic Particle Scaling"),
@@ -90,8 +101,6 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         )));
         adaptiveHolder[0] = adaptiveBtn;
 
-        this.list.addSmall(profileBtn, adaptiveBtn);
-
         CycleButton<Boolean> animLodBtn = CycleButton.onOffBuilder(config.isAnimationLodEnabled()).create(
             Component.literal("Smart Entity Animations"),
             (btn, val) -> {
@@ -102,9 +111,69 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         animLodBtn.setTooltip(Tooltip.create(Component.literal(
-            "Adjusts animation update rates for distant and off-screen mobs and players based on your camera view. Saves CPU in crowded areas."
+            "Adjusts animation update rates for distant and off-screen mobs and players based on your camera view."
         )));
         animLodHolder[0] = animLodBtn;
+
+        this.list.addSmall(adaptiveBtn, animLodBtn);
+
+        CycleButton<Boolean> beaconBtn = CycleButton.onOffBuilder(config.isBeaconCulling()).create(
+            Component.literal("Beacon Beam Culling"),
+            (btn, val) -> {
+                config.setBeaconCulling(val);
+                config.setActiveProfile("custom");
+                profileBtn.setValue("custom");
+                LiltClient.onConfigUpdated();
+            }
+        );
+        beaconBtn.setTooltip(Tooltip.create(Component.literal(
+            "Hides beacon and gateway beams when they are outside your view."
+        )));
+        beaconHolder[0] = beaconBtn;
+
+        List<Integer> shadowDistOptions = List.of(24, 16, 32, -1, 0);
+        int currentShadowDist = config.getShadowDistance();
+        int shadowDist = shadowDistOptions.contains(currentShadowDist) ? currentShadowDist : 24;
+        CycleButton<Integer> shadowDistBtn = CycleButton.<Integer>builder(
+            val -> {
+                if (val <= -1) return Component.literal("Default");
+                if (val == 0) return Component.literal("Off");
+                return Component.literal(val + " blocks");
+            }
+        ).withValues(shadowDistOptions).withInitialValue(shadowDist).create(
+            Component.literal("Shadow Distance"),
+            (btn, val) -> {
+                config.setShadowDistance(val);
+                config.setActiveProfile("custom");
+                profileBtn.setValue("custom");
+                LiltClient.onConfigUpdated();
+            }
+        );
+        shadowDistBtn.setTooltip(Tooltip.create(Component.literal(
+            "Skips rendering mob shadows that are far away or in complete darkness."
+        )));
+        shadowDistHolder[0] = shadowDistBtn;
+
+        this.list.addSmall(beaconBtn, shadowDistBtn);
+
+        List<Integer> soundLimitOptions = List.of(8, 4, 2, 0);
+        int currentSoundLimit = config.getSoundLimit();
+        int soundLimit = soundLimitOptions.contains(currentSoundLimit) ? currentSoundLimit : 8;
+        CycleButton<Integer> soundLimitBtn = CycleButton.<Integer>builder(
+            val -> val == 0 ? Component.literal("Unlimited") : Component.literal(val + " / sec")
+        ).withValues(soundLimitOptions).withInitialValue(soundLimit).create(
+            Component.literal("Sound Limiter"),
+            (btn, val) -> {
+                config.setSoundLimit(val);
+                config.setActiveProfile("custom");
+                profileBtn.setValue("custom");
+                LiltClient.onConfigUpdated();
+            }
+        );
+        soundLimitBtn.setTooltip(Tooltip.create(Component.literal(
+            "Prevents audio stutter by limiting repeated mob and piston sounds in crowded areas."
+        )));
+        soundLimitHolder[0] = soundLimitBtn;
 
         CycleButton<Boolean> texCullBtn = CycleButton.onOffBuilder(config.isTextureCullingEnabled()).create(
             Component.literal("Optimized Texture Updates"),
@@ -120,7 +189,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         )));
         texCullHolder[0] = texCullBtn;
 
-        this.list.addSmall(animLodBtn, texCullBtn);
+        this.list.addSmall(soundLimitBtn, texCullBtn);
 
         CycleButton<Boolean> tickGuardBtn = CycleButton.onOffBuilder(config.isTickBurstProtectionEnabled()).create(
             Component.literal("Server Catch-Up Limiter"),
@@ -166,9 +235,9 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         )));
         particleHolder[0] = particleBtn;
 
-        List<Integer> budgetOptions = List.of(100, 300, 500, 1000, 1500, 2500);
+        List<Integer> budgetOptions = List.of(100, 300, 500, 1000, 1500, 2500, 3000);
         int currentBudget = config.getParticleBudget();
-        int budget = budgetOptions.contains(currentBudget) ? currentBudget : 1000;
+        int budget = budgetOptions.contains(currentBudget) ? currentBudget : 1500;
         CycleButton<Integer> budgetBtn = CycleButton.<Integer>builder(
             val -> Component.literal(String.valueOf(val))
         ).withValues(budgetOptions).withInitialValue(budget).create(
@@ -187,7 +256,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
 
         this.list.addSmall(particleBtn, budgetBtn);
 
-        List<Integer> distOptions = List.of(16, 20, 32, 48, 64);
+        List<Integer> distOptions = List.of(16, 20, 24, 32, 48, 64);
         int currentDist = (int) Math.round(Math.sqrt(config.getParticleDistanceCullSq()));
         int dist = distOptions.contains(currentDist) ? currentDist : 32;
         CycleButton<Integer> distBtn = CycleButton.<Integer>builder(
@@ -220,11 +289,14 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         this.list.addSmall(distBtn, hudBtn);
 
         Button resetBtn = Button.builder(Component.literal("Reset Defaults"), btn -> {
-            config.setActiveProfile("balanced");
+            config.setActiveProfile("medium");
             LiltClient.onConfigUpdated();
-            profileBtn.setValue("balanced");
+            profileBtn.setValue("medium");
             if (adaptiveHolder[0] != null) adaptiveHolder[0].setValue(config.isAdaptiveEnabled());
             if (animLodHolder[0] != null) animLodHolder[0].setValue(config.isAnimationLodEnabled());
+            if (beaconHolder[0] != null) beaconHolder[0].setValue(config.isBeaconCulling());
+            if (shadowDistHolder[0] != null) shadowDistHolder[0].setValue(config.getShadowDistance());
+            if (soundLimitHolder[0] != null) soundLimitHolder[0].setValue(config.getSoundLimit());
             if (texCullHolder[0] != null) texCullHolder[0].setValue(config.isTextureCullingEnabled());
             if (tickGuardHolder[0] != null) tickGuardHolder[0].setValue(config.isTickBurstProtectionEnabled());
             if (gcGuardHolder[0] != null) gcGuardHolder[0].setValue(config.isGcGuardEnabled());
@@ -233,7 +305,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             if (distHolder[0] != null) distHolder[0].setValue((int) Math.round(Math.sqrt(config.getParticleDistanceCullSq())));
         }).build();
         resetBtn.setTooltip(Tooltip.create(Component.literal(
-            "Restores all Lilt settings back to the default Balanced profile."
+            "Restores all Lilt settings back to the default Medium profile."
         )));
 
         this.list.addSmall(resetBtn, null);
