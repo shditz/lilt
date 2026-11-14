@@ -1,8 +1,38 @@
 package dev.lilt.optimization.entity;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
+
 public final class AnimationLodManager {
 
+    private static final MethodHandle IRIS_SHADOW_CHECK;
+
+    static {
+        MethodHandle handle = null;
+        try {
+            Class<?> apiClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            Method getInstance = apiClass.getMethod("getInstance");
+            Object instance = getInstance.invoke(null);
+            Method isShadowMap = apiClass.getMethod("isRenderingShadowMap");
+            handle = MethodHandles.publicLookup().unreflect(isShadowMap).bindTo(instance);
+        } catch (Throwable ignored) {
+        }
+        IRIS_SHADOW_CHECK = handle;
+    }
+
     private AnimationLodManager() {}
+
+    public static boolean isIrisShadowPass() {
+        if (IRIS_SHADOW_CHECK == null) {
+            return false;
+        }
+        try {
+            return (boolean) IRIS_SHADOW_CHECK.invokeExact();
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
 
     public static boolean isInFov(double camX, double camY, double camZ,
                                   float lookX, float lookY, float lookZ,
@@ -21,6 +51,9 @@ public final class AnimationLodManager {
     }
 
     public static int getLodInterval(double distanceSq, boolean inFov, boolean spiking) {
+        if (isIrisShadowPass()) {
+            return 1;
+        }
         if (!inFov) {
             if (distanceSq <= 64.0) {
                 return spiking ? 4 : 2;
