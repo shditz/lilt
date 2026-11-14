@@ -21,9 +21,11 @@ class AdaptiveControllerTest {
     @BeforeEach
     void setUp() {
         config = new LiltConfig();
+        config.setParticleBudget(1000);
         monitor = new PerformanceMonitor();
         diagnostics = new PerformanceDiagnostics(monitor);
         particleOptimizer = new ParticleOptimizer(config, new ModCompat());
+        particleOptimizer.setEffectiveBudget(1000);
         controller = new AdaptiveController(config, monitor, diagnostics, particleOptimizer);
     }
 
