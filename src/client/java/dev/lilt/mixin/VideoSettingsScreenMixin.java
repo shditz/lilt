@@ -73,11 +73,11 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         profileBtn.setTooltip(Tooltip.create(Component.literal(
-            "Balanced: Recommended default baseline.\nLow: Maximum FPS savings on budget hardware.\nPerformance: High fidelity for strong GPUs.\nCustom: Preserves your manual adjustments."
+            "Balanced: Recommended baseline.\nLow: Maximum FPS for lower-end PCs.\nPerformance: High quality settings.\nCustom: Manual user adjustments."
         )));
 
         CycleButton<Boolean> adaptiveBtn = CycleButton.onOffBuilder(config.isAdaptiveEnabled()).create(
-            Component.literal("Adaptive Tuning"),
+            Component.literal("Dynamic Particle Scaling"),
             (btn, val) -> {
                 config.setAdaptiveEnabled(val);
                 config.setActiveProfile("custom");
@@ -86,14 +86,14 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         adaptiveBtn.setTooltip(Tooltip.create(Component.literal(
-            "Dynamically scales particle workload down during severe frame drops to maintain smooth frame pacing."
+            "Temporarily reduces particle counts during lag spikes to help keep framerates steady."
         )));
         adaptiveHolder[0] = adaptiveBtn;
 
         this.list.addSmall(profileBtn, adaptiveBtn);
 
         CycleButton<Boolean> animLodBtn = CycleButton.onOffBuilder(config.isAnimationLodEnabled()).create(
-            Component.literal("Animation LOD"),
+            Component.literal("Smart Entity Animations"),
             (btn, val) -> {
                 config.setAnimationLodEnabled(val);
                 config.setActiveProfile("custom");
@@ -102,12 +102,12 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         animLodBtn.setTooltip(Tooltip.create(Component.literal(
-            "Throttles distant entity model animations based on distance. Greatly improves FPS in villages and farms."
+            "Adjusts animation update rates for distant and off-screen mobs and players based on your camera view. Saves CPU in crowded areas."
         )));
         animLodHolder[0] = animLodBtn;
 
         CycleButton<Boolean> texCullBtn = CycleButton.onOffBuilder(config.isTextureCullingEnabled()).create(
-            Component.literal("Texture Optimization"),
+            Component.literal("Optimized Texture Updates"),
             (btn, val) -> {
                 config.setTextureCullingEnabled(val);
                 config.setActiveProfile("custom");
@@ -116,14 +116,14 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         texCullBtn.setTooltip(Tooltip.create(Component.literal(
-            "Throttles animated texture buffer uploads across PCIe during frametime spikes and while paused."
+            "Pauses animated textures like water, lava, and fire while paused or during severe lag."
         )));
         texCullHolder[0] = texCullBtn;
 
         this.list.addSmall(animLodBtn, texCullBtn);
 
         CycleButton<Boolean> tickGuardBtn = CycleButton.onOffBuilder(config.isTickBurstProtectionEnabled()).create(
-            Component.literal("Tick Burst Limiter"),
+            Component.literal("Server Catch-Up Limiter"),
             (btn, val) -> {
                 config.setTickBurstProtectionEnabled(val);
                 config.setActiveProfile("custom");
@@ -132,12 +132,12 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         tickGuardBtn.setTooltip(Tooltip.create(Component.literal(
-            "Prevents singleplayer internal server catch-up tick bursts from locking the CPU and freezing rendering."
+            "Prevents singleplayer server tick bursts from freezing the client render thread."
         )));
         tickGuardHolder[0] = tickGuardBtn;
 
         CycleButton<Boolean> gcGuardBtn = CycleButton.onOffBuilder(config.isGcGuardEnabled()).create(
-            Component.literal("Memory Guard"),
+            Component.literal("Memory Cleanup on Pause"),
             (btn, val) -> {
                 config.setGcGuardEnabled(val);
                 config.setActiveProfile("custom");
@@ -146,7 +146,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         gcGuardBtn.setTooltip(Tooltip.create(Component.literal(
-            "Proactively triggers garbage collection while paused if memory pressure is high to prevent in-game freezes."
+            "Reclaims unused Java memory when paused if memory usage is high."
         )));
         gcGuardHolder[0] = gcGuardBtn;
 
@@ -162,7 +162,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         particleBtn.setTooltip(Tooltip.create(Component.literal(
-            "Skips rendering of distant particles outside culling range. Near-camera particles are always preserved."
+            "Hides particles that are outside your render distance."
         )));
         particleHolder[0] = particleBtn;
 
@@ -172,7 +172,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         CycleButton<Integer> budgetBtn = CycleButton.<Integer>builder(
             val -> Component.literal(String.valueOf(val))
         ).withValues(budgetOptions).withInitialValue(budget).create(
-            Component.literal("Particle Budget"),
+            Component.literal("Particle Limit"),
             (btn, val) -> {
                 config.setParticleBudget(val);
                 config.setActiveProfile("custom");
@@ -181,7 +181,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         budgetBtn.setTooltip(Tooltip.create(Component.literal(
-            "Maximum active particles allowed. Lower values eliminate frame drops during intense combat or explosions."
+            "Maximum number of active particles allowed at one time."
         )));
         budgetHolder[0] = budgetBtn;
 
@@ -193,7 +193,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         CycleButton<Integer> distBtn = CycleButton.<Integer>builder(
             val -> Component.literal(val + " blocks")
         ).withValues(distOptions).withInitialValue(dist).create(
-            Component.literal("Cull Distance"),
+            Component.literal("Particle Distance"),
             (btn, val) -> {
                 config.setParticleDistanceCullSq(val * val);
                 config.setActiveProfile("custom");
@@ -202,19 +202,19 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
             }
         );
         distBtn.setTooltip(Tooltip.create(Component.literal(
-            "Radius in blocks beyond which particles are not spawned."
+            "Maximum distance from the camera to render particles."
         )));
         distHolder[0] = distBtn;
 
         CycleButton<Boolean> hudBtn = CycleButton.onOffBuilder(config.isOverlayEnabled()).create(
-            Component.literal("HUD Overlay (F7)"),
+            Component.literal("Performance Overlay (F7)"),
             (btn, val) -> {
                 config.setOverlayEnabled(val);
                 LiltClient.onConfigUpdated();
             }
         );
         hudBtn.setTooltip(Tooltip.create(Component.literal(
-            "Displays live telemetry overlay: FPS, pacing, tick time, GC pauses, and bottleneck diagnosis."
+            "Shows an on-screen overlay with FPS, frametimes, and memory status."
         )));
 
         this.list.addSmall(distBtn, hudBtn);
