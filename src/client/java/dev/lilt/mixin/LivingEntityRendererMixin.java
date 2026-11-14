@@ -30,7 +30,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         }
 
         if (mc.gameRenderer == null) return;
-        Camera cam = mc.gameRenderer.mainCamera();
+        Camera cam = mc.gameRenderer.getMainCamera();
         if (cam == null || !cam.isInitialized()) return;
 
         Vec3 camPos = cam.position();
