@@ -50,72 +50,72 @@ public class LiltConfigScreen extends Screen {
             }
         );
         profileBtn.setTooltip(Tooltip.create(Component.literal(
-            "Balanced: Recommended default baseline.\nLow: Maximum FPS savings on budget hardware.\nPerformance: High fidelity for strong GPUs.\nCustom: Preserves your manual adjustments."
+            "Balanced: Recommended baseline.\nLow: Maximum FPS for lower-end PCs.\nPerformance: High quality settings.\nCustom: Manual user adjustments."
         )));
         this.addRenderableWidget(profileBtn);
 
         CycleButton<Boolean> adaptiveBtn = CycleButton.onOffBuilder(config.isAdaptiveEnabled()).create(
             rightX, 40, buttonWidth, buttonHeight,
-            Component.literal("Adaptive Tuning"),
+            Component.literal("Dynamic Particle Scaling"),
             (btn, val) -> {
                 config.setAdaptiveEnabled(val);
                 LiltClient.onConfigUpdated();
             }
         );
         adaptiveBtn.setTooltip(Tooltip.create(Component.literal(
-            "Dynamically scales particle workload down during severe frame drops to maintain smooth frame pacing."
+            "Temporarily reduces particle counts during lag spikes to help keep framerates steady."
         )));
         this.addRenderableWidget(adaptiveBtn);
 
         CycleButton<Boolean> animLodBtn = CycleButton.onOffBuilder(config.isAnimationLodEnabled()).create(
             leftX, 64, buttonWidth, buttonHeight,
-            Component.literal("Animation LOD"),
+            Component.literal("Smart Entity Animations"),
             (btn, val) -> {
                 config.setAnimationLodEnabled(val);
                 LiltClient.onConfigUpdated();
             }
         );
         animLodBtn.setTooltip(Tooltip.create(Component.literal(
-            "Throttles distant entity model animations based on distance. Greatly improves FPS in villages and farms."
+            "Adjusts animation update rates for distant and off-screen mobs and players based on your camera view."
         )));
         this.addRenderableWidget(animLodBtn);
 
         CycleButton<Boolean> texCullBtn = CycleButton.onOffBuilder(config.isTextureCullingEnabled()).create(
             rightX, 64, buttonWidth, buttonHeight,
-            Component.literal("Texture Optimization"),
+            Component.literal("Optimized Texture Updates"),
             (btn, val) -> {
                 config.setTextureCullingEnabled(val);
                 LiltClient.onConfigUpdated();
             }
         );
         texCullBtn.setTooltip(Tooltip.create(Component.literal(
-            "Throttles animated texture buffer uploads across PCIe during frametime spikes and while paused."
+            "Pauses animated textures like water, lava, and fire while paused or during severe lag."
         )));
         this.addRenderableWidget(texCullBtn);
 
         CycleButton<Boolean> tickGuardBtn = CycleButton.onOffBuilder(config.isTickBurstProtectionEnabled()).create(
             leftX, 88, buttonWidth, buttonHeight,
-            Component.literal("Tick Burst Limiter"),
+            Component.literal("Server Catch-Up Limiter"),
             (btn, val) -> {
                 config.setTickBurstProtectionEnabled(val);
                 LiltClient.onConfigUpdated();
             }
         );
         tickGuardBtn.setTooltip(Tooltip.create(Component.literal(
-            "Prevents singleplayer internal server catch-up tick bursts from locking the CPU and freezing rendering."
+            "Prevents singleplayer server tick bursts from freezing the client render thread."
         )));
         this.addRenderableWidget(tickGuardBtn);
 
         CycleButton<Boolean> gcGuardBtn = CycleButton.onOffBuilder(config.isGcGuardEnabled()).create(
             rightX, 88, buttonWidth, buttonHeight,
-            Component.literal("Memory Guard"),
+            Component.literal("Memory Cleanup on Pause"),
             (btn, val) -> {
                 config.setGcGuardEnabled(val);
                 LiltClient.onConfigUpdated();
             }
         );
         gcGuardBtn.setTooltip(Tooltip.create(Component.literal(
-            "Proactively triggers garbage collection while paused if memory pressure is high to prevent in-game freezes."
+            "Reclaims unused Java memory when paused if memory usage is high."
         )));
         this.addRenderableWidget(gcGuardBtn);
 
@@ -128,7 +128,7 @@ public class LiltConfigScreen extends Screen {
             }
         );
         particleBtn.setTooltip(Tooltip.create(Component.literal(
-            "Skips rendering of distant particles outside culling range. Near-camera particles are always preserved."
+            "Hides particles that are outside your render distance."
         )));
         this.addRenderableWidget(particleBtn);
 
@@ -138,7 +138,7 @@ public class LiltConfigScreen extends Screen {
             val -> Component.literal(String.valueOf(val))
         ).withValues(PARTICLE_BUDGET_OPTIONS).withInitialValue(budgetVal).create(
             rightX, 112, buttonWidth, buttonHeight,
-            Component.literal("Particle Budget"),
+            Component.literal("Particle Limit"),
             (btn, val) -> {
                 config.setParticleBudget(val);
                 LiltClient.onConfigUpdated();
@@ -146,7 +146,7 @@ public class LiltConfigScreen extends Screen {
             }
         );
         budgetBtn.setTooltip(Tooltip.create(Component.literal(
-            "Maximum active particles allowed. Lower values eliminate frame drops during intense combat or explosions."
+            "Maximum number of active particles allowed at one time."
         )));
         this.addRenderableWidget(budgetBtn);
 
@@ -156,7 +156,7 @@ public class LiltConfigScreen extends Screen {
             val -> Component.literal(val + " blocks")
         ).withValues(CULL_DISTANCE_OPTIONS).withInitialValue(distVal).create(
             leftX, 136, buttonWidth, buttonHeight,
-            Component.literal("Cull Distance"),
+            Component.literal("Particle Distance"),
             (btn, val) -> {
                 config.setParticleDistanceCullSq(val * val);
                 LiltClient.onConfigUpdated();
@@ -164,20 +164,20 @@ public class LiltConfigScreen extends Screen {
             }
         );
         distBtn.setTooltip(Tooltip.create(Component.literal(
-            "Radius in blocks beyond which particles are not spawned."
+            "Maximum distance from the camera to render particles."
         )));
         this.addRenderableWidget(distBtn);
 
         CycleButton<Boolean> overlayBtn = CycleButton.onOffBuilder(config.isOverlayEnabled()).create(
             rightX, 136, buttonWidth, buttonHeight,
-            Component.literal("HUD Overlay (F7)"),
+            Component.literal("Performance Overlay (F7)"),
             (btn, val) -> {
                 config.setOverlayEnabled(val);
                 LiltClient.onConfigUpdated();
             }
         );
         overlayBtn.setTooltip(Tooltip.create(Component.literal(
-            "Displays live telemetry overlay: FPS, pacing, tick time, GC pauses, and bottleneck diagnosis."
+            "Shows an on-screen overlay with FPS, frametimes, and memory status."
         )));
         this.addRenderableWidget(overlayBtn);
 
