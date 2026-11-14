@@ -5,11 +5,14 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [],
   "client": [
+    "BeaconRendererMixin",
     "BlockEntityRenderDispatcherMixin",
+    "EntityRendererMixin",
     "IntegratedServerMixin",
     "LivingEntityRendererMixin",
     "MinecraftMixin",
     "ParticleEngineMixin",
+    "SoundEngineMixin",
     "TextureAtlasMixin",
     "VideoSettingsScreenMixin"
   ],
